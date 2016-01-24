@@ -1,10 +1,9 @@
-#define YYSTYPE tNode*
-
 /* Defining the type for tNode */
 
 #define typeInt 0
 #define typeBool 1
 #define typeString 2
+#define NOTHING -1
 
 /* Definition for Node Type in tNode*/
 
@@ -30,9 +29,9 @@ typedef struct tNode{
 
 tNode *makeTree(int dataType, int nodeType, char *name, int val, tNode *arglist, tNode *p1, tNode *p2, tNode *p3);
 
-tNode *makeConditionalNode(char *c, tNode *p1, tNode *p2, tNode *p3);
+tNode *makeConditionalNode(int op, tNode *p1, tNode *p2, tNode *p3);
 
-tNode *makeIterativeNode(char *c, tNode *p1, tNode *p2);
+tNode *makeIterativeNode(int op, tNode *p1, tNode *p2);
 
 tNode *makeNum(int n);
 
@@ -48,7 +47,9 @@ tNode *makeIONode(int op, tNode *node);
 
 typedef struct Statement{
 	tNode *stmt;
-	struct statement *next;
+	struct Statement *next;
 } Statement;
 
 Statement *makeSyntaxTree(tNode *node, Statement *next);
+
+int evaluate(Statement *ptr);

@@ -1,9 +1,11 @@
 %{
 	#include <stdio.h>
 	#include <stdlib.h>
-	#define YYSTYPE tNode*
+	#include "expl.h"
 
+	#define YYSTYPE tNode*
 	#include "y.tab.h"
+
 
 	int number;
 %}
