@@ -39,10 +39,10 @@ decllist: decl decllist
 				;
 
 decl: integer ID ';'		{gInstall($2->name, integer, 0, NULL);}
+		| integer ID '[' NUM ']' ';' {gInstall($2->name, integer, $4->val, NULL);}
 		;
 
-body: BEGIN1 Slist END	{evaluate($2);
-	exit(0);}
+body: BEGIN1 Slist END	{evaluate($2);exit(0);}
 	 ;
 
 Slist: Stmt Slist       {$$ = makeStatement($1, $2);}

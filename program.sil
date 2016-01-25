@@ -4,12 +4,10 @@ DECL
 	int c;
 ENDDECL
 BEGIN
-	read(ad);
-	read(b);
-	if (ad < b) then
-		c = ad + b;
-	else
-		c = ad - b;
-	endif;
-	write(c);
-END
+	read(a);
+	b = 1;
+	while(b < 10) do
+		write(a * b);
+		b = b + 1;
+	endwhile;
+	END

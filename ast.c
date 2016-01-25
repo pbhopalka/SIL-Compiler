@@ -88,19 +88,23 @@ void evaluate(struct tnode *t){
 		t->val = *(temp->binding);
   }
   else if (t->nodeType == ASSG){ 											//For Assignments
-    int *m = (int*)malloc(sizeof(int));
 		gTable *temp;
 		temp = gSearch(t->left->name);
-		temp->binding = m;
+		if (temp->binding == NULL){
+			int *m = (int*)malloc(sizeof(int));
+			temp->binding = m;
+		}
 		evaluate(t->right);
-    *m = t->right->val;
+    *(temp->binding) = t->right->val;
   }
   else if (t->nodeType == READ){											//For Read Statement
-    int *m = (int*)malloc(sizeof(int));
 		gTable *temp;
 		temp = gSearch(t->expr->name);
-		temp->binding = m;
-    scanf("%d", m);
+		if (temp->binding == NULL){
+			int *m = (int*)malloc(sizeof(int));
+			temp->binding = m;
+		}
+    scanf("%d", temp->binding);
   }
   else if (t->nodeType == WRITE){											//For Write Statement
     evaluate(t->expr);
