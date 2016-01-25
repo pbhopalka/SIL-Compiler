@@ -1,0 +1,6 @@
+BEGIN
+	write(1);
+  read(f);
+	read(g);
+	write(f+g);
+END

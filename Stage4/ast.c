@@ -96,6 +96,39 @@ void evaluate(struct tnode *t){
         evaluate(t->right);
         t->val = t->left->val * t->right->val;
         break;
+			case LT:
+        evaluate(t->left);
+        evaluate(t->right);
+        t->val = t->left->val < t->right->val;
+        break;
+			case GT:
+        evaluate(t->left);
+        evaluate(t->right);
+        t->val = t->left->val > t->right->val;
+        break;
+			case LE:
+				evaluate(t->left);
+				evaluate(t->right);
+				t->val = t->left->val <= t->right->val;
+				break;
+			case GE:
+        evaluate(t->left);
+        evaluate(t->right);
+        t->val = t->left->val >= t->right->val;
+        break;
+			case EQ:
+        evaluate(t->left);
+        evaluate(t->right);
+        t->val = t->left->val == t->right->val;
+        break;
+			case NE:
+        evaluate(t->left);
+        evaluate(t->right);
+        t->val = t->left->val != t->right->val;
+        break;
+			default:
+				printf("Error in evaluation\n");
+				exit(0);
 		}
 	}
 }

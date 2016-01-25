@@ -1,6 +1,6 @@
-all:	build compile run
+all:	build compile
 
-build: 
+build:
 		@echo "Make sure your lex and yacc filenames are same. Dont include the extension"; \
 		read -p "Enter filename:" file; \
 		lex $$file.l; \
@@ -9,7 +9,7 @@ build:
 compile:	lex.yy.c y.tab.c
 		gcc lex.yy.c y.tab.c -o exe
 
-run: 
+run:
 		./exe
 
 clean:
