@@ -3,6 +3,14 @@
 
 int var[26];
 
+struct tnode *makeStatement(struct tnode *node, struct tnode *next){
+	tnode *temp;
+	temp = (tnode*)malloc(sizeof(tnode));
+	temp->expr = node;
+	temp->left = next;
+	return temp;
+}
+
 struct tnode *makeLeaf(int n){
 	struct tnode *temp;
 	temp = (struct tnode*)malloc(sizeof(struct tnode));

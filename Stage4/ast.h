@@ -6,6 +6,8 @@ typedef struct tnode{
 	struct tnode *left, *right;
 }tnode;
 
+struct tnode *makeStatement(struct tnode *node, struct tnode *next);
+
 struct tnode *makeLeaf(int n);
 
 struct tnode *makeOperatorNode (int op, struct tnode *left, struct tnode *right);

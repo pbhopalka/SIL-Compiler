@@ -14,26 +14,26 @@
 
 [a-z]   {
           yylval = makeID(yytext);
-          printf("ID\n");
           return ID;
         }
 [0-9]+ {
 			number = atoi(yytext);
-			printf("%d\n", number);
       yylval = makeLeaf(number);
 			return NUM;
 	   }
-"+" {printf("%d\n", PLUS);return PLUS;}
-"-" {printf("%d\n", SUB);return SUB;}
-"*" {printf("%d\n", MUL);return MUL;}
-"/" {printf("%d\n", DIV);return DIV;}
-"=" {printf("%d\n", ASSG);return ASSG;}
+"+" 	{return PLUS;}
+"-" 	{return SUB;}
+"*" 	{return MUL;}
+"/" 	{return DIV;}
+"=" 	{return ASSG;}
 "read"  {return READ;}
 "write" {return WRITE;}
+"begin" {return BEGIN1;}
+"end" {return END;}
 [ \t] {}
-[;]   {printf("%s\n", yytext);}
-[()] {return *yytext;}
-[\n] {printf("Enter\n");return END;}
+[;]   {return *yytext;}
+[()] 	{return *yytext;}
+[\n] 	{}
 . {
 	yyerror("Unknown character.\n");
   }

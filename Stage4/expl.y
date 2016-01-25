@@ -12,7 +12,7 @@
 
 %}
 
-%token NUM END ID
+%token NUM ID BEGIN1 END
 %token READ WRITE
 %token PLUS SUB MUL DIV ASSG
 %left PLUS SUB
@@ -20,21 +20,20 @@
 
 %%
 
-prog: Slist END {
-					//evaluate($1);
-					exit(0);
-			   }
+prog: BEGIN1 Slist END	{
+												while ($2 != NULL){
+													evaluate($2->expr);
+													$2 = $2->left;
+												}
+												exit(0);
+										  }
 	 ;
 
-Slist:Stmt         {/*evaluate($1);printf("%d\n", $1->val);$$ = $1;*/}
+Slist: Stmt Slist       {$$ = makeStatement($1, $2);}
+		 | Stmt							{$$ = makeStatement($1, NULL);}
      ;
 
-Stmt: ID ASSG expr ';'        {
-                                printf("Stmt");
-                                /*$$ = makeOperatorNode(ASSG, $1, $3);
-                                evaluate($$);
-                                printf("%d\n", $$->val);*/
-                                }
+Stmt: ID ASSG expr ';'      	{$$ = makeOperatorNode(ASSG, $1, $3);}
     | READ '(' ID ')' ';'     {$$ = makeIONode(READ, $3);}
     | WRITE '(' expr ')' ';'  {$$ = makeIONode(WRITE, $3);}
     ;
@@ -45,8 +44,8 @@ expr: expr PLUS expr {$$ = makeOperatorNode(PLUS, $1, $3);}
 	| expr DIV expr {$$ = makeOperatorNode(DIV, $1, $3);}
 	| '(' expr ')' {$$ = $2;}
 	| SUB expr     {$$ = makeOperatorNode(SUB, makeLeaf(0), $2);}
-	| NUM          {printf("NUM\n");$$ = $1;}
-  | ID           {printf("ID\n");$$ = $1;}
+	| NUM          {$$ = $1;}
+  | ID           {$$ = $1;}
 	;
 
 %%
