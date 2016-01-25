@@ -1,46 +1,53 @@
 %{
 	#include <stdio.h>
 	#include <stdlib.h>
-	#include "expl.h"
+	#include "ast.h"
 
-	#define YYSTYPE tNode*
+	#define YYSTYPE tnode*
 	#include "y.tab.h"
 
-
 	int number;
+	int yyerror();
 %}
 
 %%
 
-[a-z] 	{
-					yylval = makeIdNode(yytext);
-					return ID;
-				}
-[0-9]+ 	{
+[a-z]   {
+          yylval = makeID(yytext);
+          return ID;
+        }
+[0-9]+  {
 					number = atoi(yytext);
-					yylval = makeNum(number);
+      		yylval = makeLeaf(number);
 					return NUM;
-				}
-"read" 		{return READ;}
-"write"		{return WRITE;}
-[=] 			{return ASSG;}
-[+] 			{return PLUS;}
-[-]				{return SUB;}
-[*] 			{return MUL;}
-[/]				{return DIV;}
-[%]				{return MOD;}
-[<]				{return LT;}
-[>]				{return GT;}
-"<="			{return LE;}
-">="			{return GE;}
-"!="			{return NE;}
-"=="			{return EQ;}
-[ \t] 		{}
-[\n] 			{return *yytext;}
-"," 			{return *yytext;}
-";" 			{return *yytext;}
-"(" 			{return *yytext;}
-")" 			{return *yytext;}
+	   		}
+"+" 		{return PLUS;}
+"-" 		{return SUB;}
+"*" 		{return MUL;}
+"/" 		{return DIV;}
+"=" 		{return ASSG;}
+"<"			{return LT;}
+">"			{return GT;}
+"<="		{return LE;}
+">="		{return GE;}
+"=="		{return EQ;}
+"!="		{return NE;}
+"read"  {return READ;}
+"write" {return WRITE;}
+"BEGIN" {return BEGIN1;}
+"END" 	{return END;}
+"if"		{return IF;}
+"then" 	{return THEN;}
+"else" 	{return ELSE;}
+"endif"	{return ENDIF;}
+"while"	{return WHILE;}
+"do"		{return DO;}
+"endwhile"	{return ENDWHILE;}
+[ \t] 	{}
+[;]   	{return *yytext;}
+[()] 		{return *yytext;}
+[\n] 		{}
+. 			{yyerror("Unknown character.\n");}
 
 %%
 
