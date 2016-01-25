@@ -16,22 +16,22 @@
           yylval = makeID(yytext);
           return ID;
         }
-[0-9]+ {
-			number = atoi(yytext);
-      yylval = makeLeaf(number);
-			return NUM;
-	   }
-"+" 	{return PLUS;}
-"-" 	{return SUB;}
-"*" 	{return MUL;}
-"/" 	{return DIV;}
-"=" 	{return ASSG;}
-"<"		{return LT;}
-">"		{return GT;}
-"<="	{return LE;}
-">="	{return GE;}
-"=="	{return EQ;}
-"!="	{return NE;}
+[0-9]+  {
+					number = atoi(yytext);
+      		yylval = makeLeaf(number);
+					return NUM;
+	   		}
+"+" 		{return PLUS;}
+"-" 		{return SUB;}
+"*" 		{return MUL;}
+"/" 		{return DIV;}
+"=" 		{return ASSG;}
+"<"			{return LT;}
+">"			{return GT;}
+"<="		{return LE;}
+">="		{return GE;}
+"=="		{return EQ;}
+"!="		{return NE;}
 "read"  {return READ;}
 "write" {return WRITE;}
 "BEGIN" {return BEGIN1;}
@@ -43,13 +43,11 @@
 "while"	{return WHILE;}
 "do"		{return DO;}
 "endwhile"	{return ENDWHILE;}
-[ \t] {}
-[;]   {return *yytext;}
-[()] 	{return *yytext;}
-[\n] 	{}
-. {
-	yyerror("Unknown character.\n");
-  }
+[ \t] 	{}
+[;]   	{return *yytext;}
+[()] 		{return *yytext;}
+[\n] 		{}
+. 			{yyerror("Unknown character.\n");}
 
 %%
 

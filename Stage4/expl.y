@@ -25,10 +25,7 @@
 
 %%
 
-prog: BEGIN1 Slist END	{
-												evaluate($2);
-												exit(0);
-										  }
+prog: BEGIN1 Slist END	{evaluate($2);exit(0);}
 	 ;
 
 Slist: Stmt Slist       {$$ = makeStatement($1, $2);}

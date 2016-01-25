@@ -75,27 +75,27 @@ struct tnode *makeIterativeNode(tnode *expr, tnode *slist){
 }
 
 void evaluate(struct tnode *t){
-	if (t->nodeType == NUM){
+	if (t->nodeType == NUM){ 														//For numbers
 		return;
 	}
-  else if(t->nodeType == ID){
+  else if(t->nodeType == ID){ 												//For identifiers
     char c = *(t->name);
     t->val = var[c - 'a'];
   }
-  else if (t->nodeType == ASSG){
+  else if (t->nodeType == ASSG){ 											//For Assignments
     evaluate(t->right);
     char c = *(t->left->name);
     var[c - 'a'] = t->right->val;
   }
-  else if (t->nodeType == READ){
+  else if (t->nodeType == READ){											//For Read Statement
     char c = *(t->expr->name);
     scanf("%d", &var[c - 'a']);
   }
-  else if (t->nodeType == WRITE){
+  else if (t->nodeType == WRITE){											//For Write Statement
     evaluate(t->expr);
     printf("%d\n", t->expr->val);
   }
-	else if (t->nodeType == IF){
+	else if (t->nodeType == IF){												//For IF Statement
 		evaluate(t->expr);
 		if (t->expr->val == 1){
 			evaluate(t->left);
@@ -105,20 +105,20 @@ void evaluate(struct tnode *t){
 				evaluate(t->right);
 		}
 	}
-	else if (t->nodeType == WHILE){
+	else if (t->nodeType == WHILE){											//For While Statement
 		evaluate(t->expr);
 		while(t->expr->val == 1){
 			evaluate(t->left);
 			evaluate(t->expr);
 		}
 	}
-	else if (t->nodeType == STMT){
+	else if (t->nodeType == STMT){											//For handling Statement List
 		while (t != NULL){
 			evaluate(t->expr);
 			t = t->left;
 		}
 	}
-	else{
+	else{																								//For arithmetic and relational operators
 		switch (t->nodeType){
 			case PLUS:
 				evaluate(t->left);
