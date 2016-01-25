@@ -6,6 +6,7 @@ int var[26];
 struct tnode *makeStatement(struct tnode *node, struct tnode *next){
 	tnode *temp;
 	temp = (tnode*)malloc(sizeof(tnode));
+	temp->nodeType = STMT;
 	temp->expr = node;
 	temp->left = next;
 	return temp;
@@ -53,6 +54,26 @@ struct tnode *makeIONode(int op, struct tnode *node){ //Using t->expr not t->lef
   return temp;
 }
 
+struct tnode *makeConditionalNode(tnode *expr, tnode *thenPart, tnode *elsePart){
+	tnode *temp;
+	temp = (tnode*)malloc(sizeof(tnode));
+	temp->nodeType = IF;
+	temp->expr = expr;
+	temp->left = thenPart;
+	temp->right = elsePart;
+	return temp;
+}
+
+struct tnode *makeIterativeNode(tnode *expr, tnode *slist){
+	tnode *temp;
+	temp = (tnode*)malloc(sizeof(tnode));
+	temp->nodeType = WHILE;
+	temp->expr = expr;
+	temp->left = slist;
+	temp->right = NULL;
+	return temp;
+}
+
 void evaluate(struct tnode *t){
 	if (t->nodeType == NUM){
 		return;
@@ -74,6 +95,29 @@ void evaluate(struct tnode *t){
     evaluate(t->expr);
     printf("%d\n", t->expr->val);
   }
+	else if (t->nodeType == IF){
+		evaluate(t->expr);
+		if (t->expr->val == 1){
+			evaluate(t->left);
+		}
+		else{
+			if (t->right != NULL)
+				evaluate(t->right);
+		}
+	}
+	else if (t->nodeType == WHILE){
+		evaluate(t->expr);
+		while(t->expr->val == 1){
+			evaluate(t->left);
+			evaluate(t->expr);
+		}
+	}
+	else if (t->nodeType == STMT){
+		while (t != NULL){
+			evaluate(t->expr);
+			t = t->left;
+		}
+	}
 	else{
 		switch (t->nodeType){
 			case PLUS:
@@ -131,4 +175,5 @@ void evaluate(struct tnode *t){
 				exit(0);
 		}
 	}
+	return;
 }

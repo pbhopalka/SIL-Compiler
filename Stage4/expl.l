@@ -35,7 +35,14 @@
 "read"  {return READ;}
 "write" {return WRITE;}
 "BEGIN" {return BEGIN1;}
-"END" {return END;}
+"END" 	{return END;}
+"if"		{return IF;}
+"then" 	{return THEN;}
+"else" 	{return ELSE;}
+"endif"	{return ENDIF;}
+"while"	{return WHILE;}
+"do"		{return DO;}
+"endwhile"	{return ENDWHILE;}
 [ \t] {}
 [;]   {return *yytext;}
 [()] 	{return *yytext;}

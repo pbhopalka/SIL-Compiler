@@ -1,3 +1,5 @@
+#define STMT 0
+
 typedef struct tnode{
 	int nodeType;
   int val;
@@ -15,6 +17,10 @@ struct tnode *makeOperatorNode (int op, struct tnode *left, struct tnode *right)
 struct tnode *makeID(char *id);
 
 struct tnode *makeIONode(int op, struct tnode *arg);
+
+struct tnode *makeConditionalNode(tnode *expr, tnode *thenPart, tnode *elsePart);
+
+struct tnode *makeIterativeNode(tnode *expr, tnode *slist);
 
 void printBracket(struct tnode *t);
 

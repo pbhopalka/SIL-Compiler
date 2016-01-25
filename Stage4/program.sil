@@ -1,0 +1,8 @@
+BEGIN
+	read(a);
+	read(b);
+	if (a<5) then
+		write(a);
+	endif;
+	write(a+b);
+END

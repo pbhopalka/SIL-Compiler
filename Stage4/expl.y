@@ -16,6 +16,7 @@
 
 %token NUM ID BEGIN1 END
 %token READ WRITE
+%token IF THEN ELSE ENDIF WHILE DO ENDWHILE
 %token PLUS SUB MUL DIV ASSG
 %token LT GT LE GE EQ NE
 %left PLUS SUB
@@ -25,10 +26,7 @@
 %%
 
 prog: BEGIN1 Slist END	{
-												while ($2 != NULL){
-													evaluate($2->expr);
-													$2 = $2->left;
-												}
+												evaluate($2);
 												exit(0);
 										  }
 	 ;
@@ -40,6 +38,9 @@ Slist: Stmt Slist       {$$ = makeStatement($1, $2);}
 Stmt: ID ASSG expr ';'      	{$$ = makeOperatorNode(ASSG, $1, $3);}
     | READ '(' ID ')' ';'     {$$ = makeIONode(READ, $3);}
     | WRITE '(' expr ')' ';'  {$$ = makeIONode(WRITE, $3);}
+		| IF '(' expr ')' THEN Slist ELSE Slist ENDIF ';'	{$$ = makeConditionalNode($3, $6, $8);}
+		| IF '(' expr ')' THEN Slist ENDIF ';'						{$$ = makeConditionalNode($3, $6, NULL);}
+		| WHILE '(' expr ')' DO Slist ENDWHILE ';' 				{$$ = makeIterativeNode($3, $6);}
     ;
 
 expr: expr PLUS expr 				{$$ = makeOperatorNode(PLUS, $1, $3);}
