@@ -7,7 +7,9 @@
 	#define YYSTYPE tnode *
 
 	#include "ast.h"
+	#include "symbolTable.h"
 	#include "ast.c"
+	#include "symbolTable.c"
 
 	int yylex(void);
 	int yyerror(char const *s);
@@ -15,7 +17,8 @@
 %}
 
 %token NUM ID BEGIN1 END
-%token READ WRITE
+%token READ WRITE DECL ENDDECL
+%token integer
 %token IF THEN ELSE ENDIF WHILE DO ENDWHILE
 %token PLUS SUB MUL DIV ASSG
 %token LT GT LE GE EQ NE
@@ -25,7 +28,21 @@
 
 %%
 
-prog: BEGIN1 Slist END	{evaluate($2);exit(0);}
+prog: declaration body
+		;
+
+declaration: DECL decllist ENDDECL
+					 ;
+
+decllist: decl decllist
+				| decl
+				;
+
+decl: integer ID ';'		{gInstall($2->name, integer, 0, NULL);}
+		;
+
+body: BEGIN1 Slist END	{evaluate($2);
+	exit(0);}
 	 ;
 
 Slist: Stmt Slist       {$$ = makeStatement($1, $2);}

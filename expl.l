@@ -36,6 +36,9 @@
 "write" {return WRITE;}
 "BEGIN" {return BEGIN1;}
 "END" 	{return END;}
+"DECL"	{return DECL;}
+"ENDDECL" {return ENDDECL;}
+"int"		{return integer;}
 "if"		{return IF;}
 "then" 	{return THEN;}
 "else" 	{return ELSE;}

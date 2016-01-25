@@ -79,17 +79,28 @@ void evaluate(struct tnode *t){
 		return;
 	}
   else if(t->nodeType == ID){ 												//For identifiers
-    char c = *(t->name);
-    t->val = var[c - 'a'];
+		gTable *temp;
+		temp = gSearch(t->name);
+		if (temp == NULL){
+			printf("Variable %s not declared\n", t->name);
+			exit(0);
+		}
+		t->val = *(temp->binding);
   }
   else if (t->nodeType == ASSG){ 											//For Assignments
-    evaluate(t->right);
-    char c = *(t->left->name);
-    var[c - 'a'] = t->right->val;
+    int *m = (int*)malloc(sizeof(int));
+		gTable *temp;
+		temp = gSearch(t->left->name);
+		temp->binding = m;
+		evaluate(t->right);
+    *m = t->right->val;
   }
   else if (t->nodeType == READ){											//For Read Statement
-    char c = *(t->expr->name);
-    scanf("%d", &var[c - 'a']);
+    int *m = (int*)malloc(sizeof(int));
+		gTable *temp;
+		temp = gSearch(t->expr->name);
+		temp->binding = m;
+    scanf("%d", m);
   }
   else if (t->nodeType == WRITE){											//For Write Statement
     evaluate(t->expr);

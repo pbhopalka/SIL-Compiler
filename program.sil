@@ -1,8 +1,15 @@
+DECL
+	int a;
+	int b;
+	int c;
+ENDDECL
 BEGIN
-	read(a);
+	read(ad);
 	read(b);
-	if (a<5) then
-		write(a);
+	if (ad < b) then
+		c = ad + b;
+	else
+		c = ad - b;
 	endif;
-	write(a+b);
+	write(c);
 END
