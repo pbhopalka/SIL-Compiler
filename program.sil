@@ -1,13 +1,13 @@
 DECL
-	int a;
-	int b;
+	int ad;
+	int boy;
 	int c;
 ENDDECL
 BEGIN
-	read(a);
-	b = 1;
-	while(b < 10) do
-		write(a * b);
-		b = b + 1;
+	read(ad);
+	boy = 1;
+	while(boy < 10) do
+		write(ad * boy);
+		boy = boy + 1;
 	endwhile;
 	END

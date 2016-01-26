@@ -10,17 +10,11 @@
 	int yyerror();
 %}
 
+letter [a-zA-Z]
+digit [0-9]+
+
 %%
 
-[a-z]   {
-          yylval = makeID(yytext);
-          return ID;
-        }
-[0-9]+  {
-					number = atoi(yytext);
-      		yylval = makeLeaf(number);
-					return NUM;
-	   		}
 "+" 		{return PLUS;}
 "-" 		{return SUB;}
 "*" 		{return MUL;}
@@ -46,6 +40,15 @@
 "while"	{return WHILE;}
 "do"		{return DO;}
 "endwhile"	{return ENDWHILE;}
+{letter}({letter}|{digit})*   {
+          											yylval = makeID(yytext);
+          											return ID;
+        											}
+{digit}  {
+					number = atoi(yytext);
+      		yylval = makeLeaf(number);
+					return NUM;
+	   		}
 [ \t] 	{}
 [;]   	{return *yytext;}
 [()] 		{return *yytext;}
