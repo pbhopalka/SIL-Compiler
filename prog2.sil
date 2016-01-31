@@ -1,0 +1,11 @@
+DECL
+  int a;
+  int b;
+  int c;
+ENDDECL
+BEGIN
+  a=4;
+  b = 2;
+  c = a+ b;
+  write(c);
+END

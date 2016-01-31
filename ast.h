@@ -6,6 +6,7 @@ typedef struct tnode{
 	char *name;
   struct tnode *expr;
 	struct tnode *left, *right;
+	struct gTable *gEntry;
 }tnode;
 
 struct tnode *makeStatement(struct tnode *node, struct tnode *next);
@@ -21,6 +22,8 @@ struct tnode *makeIONode(int op, struct tnode *arg);
 struct tnode *makeConditionalNode(tnode *expr, tnode *thenPart, tnode *elsePart);
 
 struct tnode *makeIterativeNode(tnode *expr, tnode *slist);
+
+void provideMemorySpace();
 
 void printBracket(struct tnode *t);
 

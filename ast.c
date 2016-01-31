@@ -1,7 +1,5 @@
 #include "y.tab.h"
-#include <string.h>
-
-int var[26];
+int memory[1000];						//Used for memory allocation of variables
 
 struct tnode *makeStatement(struct tnode *node, struct tnode *next){
 	tnode *temp;
@@ -39,8 +37,10 @@ struct tnode *makeID(char *id){
   temp->name = (char*)malloc(sizeof(char));
   strcpy(temp->name, id);
   temp->nodeType = ID;
+	temp->expr = NULL;
   temp->left = NULL;
   temp->right = NULL;
+	temp->gEntry = gSearch(id);;
   return temp;
 }
 
@@ -79,32 +79,34 @@ void evaluate(struct tnode *t){
 		return;
 	}
   else if(t->nodeType == ID){ 												//For identifiers
-		gTable *temp;
-		temp = gSearch(t->name);
-		if (temp == NULL){
-			printf("Variable %s not declared\n", t->name);
-			exit(0);
+		if (t->gEntry == NULL){
+			printf("Some variable is not declared\n");
+			exit(1);
 		}
-		t->val = *(temp->binding);
+		int offset = 0;
+		if (t->expr != NULL){
+			evaluate(t->expr);
+			offset = t->expr->val;
+		}
+		t->val = memory[t->gEntry->binding+offset];
   }
   else if (t->nodeType == ASSG){ 											//For Assignments
-		gTable *temp;
-		temp = gSearch(t->left->name);
-		if (temp->binding == NULL){
-			int *m = (int*)malloc(sizeof(int));
-			temp->binding = m;
+		int offset = 0;
+		evaluate(t->left);
+		if (t->left->expr != NULL){ //Checking if ID is array or variable
+			evaluate(t->left->expr);
+			offset = t->left->expr->val;
 		}
 		evaluate(t->right);
-    *(temp->binding) = t->right->val;
+		memory[t->left->gEntry->binding+offset] = t->right->val;
   }
   else if (t->nodeType == READ){											//For Read Statement
-		gTable *temp;
-		temp = gSearch(t->expr->name);
-		if (temp->binding == NULL){
-			int *m = (int*)malloc(sizeof(int));
-			temp->binding = m;
+		int offset = 0;
+		if (t->expr->expr != NULL){
+			evaluate(t->expr->expr);
+			offset = t->expr->expr->val;
 		}
-    scanf("%d", temp->binding);
+    scanf("%d", &memory[t->expr->gEntry->binding + offset]);
   }
   else if (t->nodeType == WRITE){											//For Write Statement
     evaluate(t->expr);

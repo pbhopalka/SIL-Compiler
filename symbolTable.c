@@ -1,14 +1,29 @@
 gTable *gStart = NULL;
 
-void gInstall(char *name, int type, int size, int *address){
+void provideMemorySpace(){
+  int memOffset = 0;
+	gTable *temp;
+	temp = gStart;
+	while(temp != NULL){
+		temp->binding = memOffset;
+		memOffset += temp->size;
+		temp = temp->next;
+	}
+}
+
+void gInstall(char *name, int type, int size){
+  gTable *tempPointer = gSearch(name);
+	if (tempPointer != NULL){
+			printf("Variable already declared\n");
+			exit(1);
+	}
   gTable *temp;
   temp = (gTable*)malloc(sizeof(gTable));
   temp->name = name;
   temp->type = type;
   temp->size = size;
-  temp->binding = address;
   temp->next = gStart;
-  gStart = temp;
+  gStart = temp;                //gStart is the start of the symbol table
 }
 
 gTable *gSearch(char *name){

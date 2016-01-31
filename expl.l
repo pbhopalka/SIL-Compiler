@@ -52,6 +52,8 @@ digit [0-9]+
 [ \t] 	{}
 [;]   	{return *yytext;}
 [()] 		{return *yytext;}
+"["			{return *yytext;}
+"]"			{return *yytext;}
 [\n] 		{}
 . 			{yyerror("Unknown character.\n");}
 

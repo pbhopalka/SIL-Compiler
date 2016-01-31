@@ -1,6 +1,7 @@
 %{
 	#include <stdio.h>
 	#include <stdlib.h>
+	#include <string.h>
 
 	extern FILE *yyin;
 
@@ -18,7 +19,7 @@
 
 %token NUM ID BEGIN1 END
 %token READ WRITE DECL ENDDECL
-%token integer
+%token integer boolean
 %token IF THEN ELSE ENDIF WHILE DO ENDWHILE
 %token PLUS SUB MUL DIV ASSG
 %token LT GT LE GE EQ NE
@@ -36,21 +37,23 @@ declaration: DECL decllist ENDDECL
 
 decllist: decl decllist
 				| decl
+				|
 				;
 
-decl: integer ID ';'		{gInstall($2->name, integer, 0, NULL);}
-		| integer ID '[' NUM ']' ';' {gInstall($2->name, integer, $4->val, NULL);}
+decl: integer ID ';'		{gInstall($2->name, integer, 1);}
+		| integer ID '[' NUM ']' ';' {gInstall($2->name, integer, $4->val);}
 		;
 
-body: BEGIN1 Slist END	{evaluate($2);exit(0);}
+body: BEGIN1 Slist END	{provideMemorySpace();evaluate($2);exit(0);}
 	 ;
 
 Slist: Stmt Slist       {$$ = makeStatement($1, $2);}
 		 | Stmt							{$$ = makeStatement($1, NULL);}
+		 |									{}
      ;
 
-Stmt: ID ASSG expr ';'      	{$$ = makeOperatorNode(ASSG, $1, $3);}
-    | READ '(' ID ')' ';'     {$$ = makeIONode(READ, $3);}
+Stmt: loc ASSG expr ';'      	{$$ = makeOperatorNode(ASSG, $1, $3);}
+    | READ '(' loc ')' ';'     {$$ = makeIONode(READ, $3);}
     | WRITE '(' expr ')' ';'  {$$ = makeIONode(WRITE, $3);}
 		| IF '(' expr ')' THEN Slist ELSE Slist ENDIF ';'	{$$ = makeConditionalNode($3, $6, $8);}
 		| IF '(' expr ')' THEN Slist ENDIF ';'						{$$ = makeConditionalNode($3, $6, NULL);}
@@ -70,8 +73,12 @@ expr: expr PLUS expr 				{$$ = makeOperatorNode(PLUS, $1, $3);}
 	| expr EQ expr						{$$ = makeOperatorNode(EQ, $1, $3);}
 	| expr NE expr						{$$ = makeOperatorNode(NE, $1, $3);}
 	| NUM          						{$$ = $1;}
-  | ID           						{$$ = $1;}
+  | loc           						{$$ = $1;}
 	;
+
+loc: ID								{$$ = $1;}
+	 | ID '[' expr ']'	{$1->expr = $3;$$ = $1;}
+	 ;
 
 %%
 
