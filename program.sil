@@ -1,11 +1,17 @@
 DECL
-	int piy;
-	int boy;
-	int c;
+  int a[10];
+  int b;
+  int c;
+  int i;
 ENDDECL
 BEGIN
-	piy = 3;
-	boy = 4;
-	read(c);
-	write(piy+b+ c);
+  a[1]=4;
+  a[2] = 2;
+  i = 0;
+  while (i < 10) do
+    read(a[i]);
+    c = c + a[i];
+    i = i + 1;
+  endwhile;
+  write(c);
 END

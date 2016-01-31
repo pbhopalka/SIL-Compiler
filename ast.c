@@ -1,5 +1,5 @@
 #include "y.tab.h"
-int memory[1000];						//Used for memory allocation of variables
+int memory[100000];						//Used for memory allocation of variables
 
 struct tnode *makeStatement(struct tnode *node, struct tnode *next){
 	tnode *temp;
