@@ -39,22 +39,26 @@ declaration: DECL decllist ENDDECL
 					 ;
 
 decllist: decl decllist
-				| decl
 				|
 				;
 
-decl: integer ID ';'							{gInstall($2->name, integer, 1);}
-		| integer ID '[' NUM ']' ';' 	{gInstall($2->name, integer, $4->val);}
-		| boolean ID ';'							{gInstall($2->name, boolean, 1);}
-		| boolean ID '[' NUM ']' ';' 	{gInstall($2->name, boolean, $4->val);}
+decl: integer idlist ';'							{groupGInstall($2, integer);}
+		| boolean idlist ';'							{groupGInstall($2, boolean);}
 		;
+
+idlist: id ',' idlist		{$1->left = $3;$$ = $1;}
+			| id							{$1->left = NULL; $$ = $1;}
+			;
+
+id : ID								{$1->val = 1;$$ = $1;}
+	 | ID '[' NUM ']'		{$1->val = $3->val;$$ = $1;}
+	 ;
 
 body: BEGIN1 Slist END	{provideMemorySpace();evaluate($2);exit(0);}
 	 ;
 
 Slist: Stmt Slist       {$$ = makeStatement($1, $2);}
-		 | Stmt							{$$ = makeStatement($1, NULL);}
-		 |									{}
+		 |									{$$ = NULL;}
      ;
 
 Stmt: loc ASSG expr ';'      	{$$ = makeAssgNode($1, $3);}
@@ -84,9 +88,8 @@ expr: expr PLUS expr 				{$$ = makeOperatorNode(PLUS, $1, $3);}
   | loc           					{$$ = $1;}
 	;
 
-loc: ID								{$$ = $1;}
-	 | ID '[' expr ']'	{$1->expr = $3;$$ = $1;}
-	 ;
+loc: ID											{$$ = $1;}
+	 | ID '[' expr ']'				{$1->expr = $3; $$ = $1;}
 
 %%
 

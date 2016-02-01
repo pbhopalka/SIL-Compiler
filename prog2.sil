@@ -1,13 +1,14 @@
 DECL
   int a;
-  bool c;
-  bool d;
+  bool c, d;
 ENDDECL
 BEGIN
-c = NOT FALSE;
+c = FALSE;
+write(4);
 if (c) then
   write(1);
 else
   write(2);
 endif;
+write(7);
 END

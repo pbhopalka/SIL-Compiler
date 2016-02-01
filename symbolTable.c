@@ -11,11 +11,20 @@ void provideMemorySpace(){
 	}
 }
 
+void groupGInstall(tnode *node, int type){
+  tnode *temp;
+  temp = node;
+  while (temp != NULL){
+    gInstall(temp->name, type, temp->val);
+    temp = temp->left;
+  }
+}
+
 void gInstall(char *name, int type, int size){
   //printf("Declaring Variable %s\n", name);
   gTable *tempPointer = gSearch(name);
 	if (tempPointer != NULL){
-			printf("Variable already declared\n");
+			printf("Variable %s already declared\n", name);
 			exit(1);
 	}
   gTable *temp;
