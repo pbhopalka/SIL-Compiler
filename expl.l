@@ -41,7 +41,6 @@ digit [0-9]+
 "while"	{return WHILE;}
 "do"		{return DO;}
 "endwhile"	{return ENDWHILE;}
-"break"	{return BREAK;}
 "AND"		{return AND;}
 "OR"		{return OR;}
 "NOT"		{return NOT;}
