@@ -1,0 +1,13 @@
+DECL
+  int a;
+  bool c;
+  bool d;
+ENDDECL
+BEGIN
+c = NOT FALSE;
+if (c) then
+  write(1);
+else
+  write(2);
+endif;
+END

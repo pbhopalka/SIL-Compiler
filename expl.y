@@ -20,11 +20,14 @@
 %token NUM ID BEGIN1 END
 %token READ WRITE DECL ENDDECL
 %token integer boolean
-%token IF THEN ELSE ENDIF WHILE DO ENDWHILE
+%token TRUE FALSE
+%token IF THEN ELSE ENDIF WHILE DO ENDWHILE BREAK
 %token PLUS SUB MUL DIV ASSG
 %token LT GT LE GE EQ NE
+%token AND OR NOT
 %left PLUS SUB
 %left MUL DIV
+%left AND OR NOT
 %nonassoc LT GT LE GE EQ NE
 
 %%
@@ -40,8 +43,10 @@ decllist: decl decllist
 				|
 				;
 
-decl: integer ID ';'		{gInstall($2->name, integer, 1);}
-		| integer ID '[' NUM ']' ';' {gInstall($2->name, integer, $4->val);}
+decl: integer ID ';'							{gInstall($2->name, integer, 1);}
+		| integer ID '[' NUM ']' ';' 	{gInstall($2->name, integer, $4->val);}
+		| boolean ID ';'							{gInstall($2->name, boolean, 1);}
+		| boolean ID '[' NUM ']' ';' 	{gInstall($2->name, boolean, $4->val);}
 		;
 
 body: BEGIN1 Slist END	{provideMemorySpace();evaluate($2);exit(0);}
@@ -52,8 +57,8 @@ Slist: Stmt Slist       {$$ = makeStatement($1, $2);}
 		 |									{}
      ;
 
-Stmt: loc ASSG expr ';'      	{$$ = makeOperatorNode(ASSG, $1, $3);}
-    | READ '(' loc ')' ';'     {$$ = makeIONode(READ, $3);}
+Stmt: loc ASSG expr ';'      	{$$ = makeAssgNode($1, $3);}
+    | READ '(' loc ')' ';'    {$$ = makeIONode(READ, $3);}
     | WRITE '(' expr ')' ';'  {$$ = makeIONode(WRITE, $3);}
 		| IF '(' expr ')' THEN Slist ELSE Slist ENDIF ';'	{$$ = makeConditionalNode($3, $6, $8);}
 		| IF '(' expr ')' THEN Slist ENDIF ';'						{$$ = makeConditionalNode($3, $6, NULL);}
@@ -65,15 +70,18 @@ expr: expr PLUS expr 				{$$ = makeOperatorNode(PLUS, $1, $3);}
 	| expr MUL expr 					{$$ = makeOperatorNode(MUL, $1, $3);}
 	| expr DIV expr 					{$$ = makeOperatorNode(DIV, $1, $3);}
 	| '(' expr ')' 						{$$ = $2;}
-	| SUB expr     						{$$ = makeOperatorNode(SUB, makeLeaf(0), $2);}
+	| SUB expr     						{$$ = makeOperatorNode(SUB, makeLeaf(0, integer), $2);}
 	| expr LT expr						{$$ = makeOperatorNode(LT, $1, $3);}
 	| expr GT expr						{$$ = makeOperatorNode(GT, $1, $3);}
 	| expr LE expr						{$$ = makeOperatorNode(LE, $1, $3);}
 	| expr GE expr						{$$ = makeOperatorNode(GE, $1, $3);}
 	| expr EQ expr						{$$ = makeOperatorNode(EQ, $1, $3);}
 	| expr NE expr						{$$ = makeOperatorNode(NE, $1, $3);}
+	| expr AND expr						{$$ = makeBooleanNode(AND, $1, $3);}
+	| expr OR expr						{$$ = makeBooleanNode(OR, $1, $3);}
+	| NOT expr								{$$ = makeBooleanNode(NOT, $2, NULL);}
 	| NUM          						{$$ = $1;}
-  | loc           						{$$ = $1;}
+  | loc           					{$$ = $1;}
 	;
 
 loc: ID								{$$ = $1;}

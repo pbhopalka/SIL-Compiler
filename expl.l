@@ -33,6 +33,7 @@ digit [0-9]+
 "DECL"	{return DECL;}
 "ENDDECL" {return ENDDECL;}
 "int"		{return integer;}
+"bool"	{return boolean;}
 "if"		{return IF;}
 "then" 	{return THEN;}
 "else" 	{return ELSE;}
@@ -40,13 +41,20 @@ digit [0-9]+
 "while"	{return WHILE;}
 "do"		{return DO;}
 "endwhile"	{return ENDWHILE;}
+"break"	{return BREAK;}
+"AND"		{return AND;}
+"OR"		{return OR;}
+"NOT"		{return NOT;}
+"TRUE"	{yylval = makeLeaf(TRUE, boolean);return NUM;}
+"FALSE"	{yylval = makeLeaf(FALSE, boolean);return NUM;}
+
 {letter}({letter}|{digit})*   {
           											yylval = makeID(yytext);
           											return ID;
         											}
 {digit}  {
 					number = atoi(yytext);
-      		yylval = makeLeaf(number);
+      		yylval = makeLeaf(number, integer);
 					return NUM;
 	   		}
 [ \t] 	{}

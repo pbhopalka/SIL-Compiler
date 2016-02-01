@@ -12,6 +12,7 @@ void provideMemorySpace(){
 }
 
 void gInstall(char *name, int type, int size){
+  //printf("Declaring Variable %s\n", name);
   gTable *tempPointer = gSearch(name);
 	if (tempPointer != NULL){
 			printf("Variable already declared\n");
