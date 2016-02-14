@@ -20,7 +20,7 @@ struct tnode *makeLeaf(int n, int type){
 		temp->val = n;
 	else
 		temp->boolVal = n;
-  temp->nodeType = NUM;
+	temp->nodeType = NUM;
 	temp->left = NULL;
 	temp->right = NULL;
 	return temp;
@@ -50,26 +50,26 @@ struct tnode *makeOperatorNode(int op, struct tnode *l, struct tnode *r){
 	else
 		temp->dataType = integer;
 	temp->name = NULL;
-  temp->nodeType = op;
+	temp->nodeType = op;
 	temp->left = l;
 	temp->right = r;
 	return temp;
 }
 
 struct tnode *makeID(char *id){
-  struct tnode *temp;
-  temp = (struct tnode*)malloc(sizeof(struct tnode));
-  temp->name = (char*)malloc(sizeof(char));
-  strcpy(temp->name, id);
-  temp->nodeType = ID;
+	struct tnode *temp;
+	temp = (struct tnode*)malloc(sizeof(struct tnode));
+	temp->name = (char*)malloc(sizeof(char));
+	strcpy(temp->name, id);
+	temp->nodeType = ID;
 	temp->expr = NULL;
-  temp->left = NULL;
-  temp->right = NULL;
+	temp->left = NULL;
+	temp->right = NULL;
 	temp->gEntry = gSearch(id);
 	if (temp->gEntry != NULL){
 		temp->dataType = temp->gEntry->type;
 	}
-  return temp;
+	return temp;
 }
 
 struct tnode *makeAssgNode(struct tnode *l, struct tnode *r){
@@ -117,24 +117,24 @@ struct tnode *makeBooleanNode(int op, struct tnode *l, struct tnode *r){
 	struct tnode *temp;
 	temp = (struct tnode*)malloc(sizeof(struct tnode));
 	temp->dataType = boolean;
-  temp->nodeType = op;
+	temp->nodeType = op;
 	temp->left = l;
 	temp->right = r;
 	return temp;
 }
 
 struct tnode *makeIONode(int op, struct tnode *node){ //Using t->expr not t->left or t->right
-  if (node->dataType != integer){
+	if (node->dataType != integer){
 		printf("Data type for I/O is not integer\n");
 		exit(1);
 	}
 	tnode *temp;
-  temp = (struct tnode*)malloc(sizeof(tnode));
-  temp->nodeType = op;
-  temp->expr = node;
-  temp->left = NULL;
-  temp->right = NULL;
-  return temp;
+	temp = (struct tnode*)malloc(sizeof(tnode));
+	temp->nodeType = op;
+	temp->expr = node;
+	temp->left = NULL;
+	temp->right = NULL;
+	return temp;
 }
 
 struct tnode *makeConditionalNode(tnode *expr, tnode *thenPart, tnode *elsePart){
@@ -169,7 +169,7 @@ void evaluate(struct tnode *t){
 	if (t->nodeType == NUM){ 														//For numbers
 		return;
 	}
-  else if(t->nodeType == ID){ 												//For identifiers
+	else if(t->nodeType == ID){ 												//For identifiers
 		if (t->gEntry == NULL){
 			printf("Variable %s is not declared\n", t->name);
 			exit(1);
@@ -183,8 +183,8 @@ void evaluate(struct tnode *t){
 			t->boolVal = memory[t->gEntry->binding+offset];
 		else
 			t->val = memory[t->gEntry->binding+offset];
-  }
-  else if (t->nodeType == ASSG){ 											//For Assignments
+	}
+	else if (t->nodeType == ASSG){ 											//For Assignments
 		int offset = 0;
 		evaluate(t->left);
 		if (t->left->expr != NULL){ //Checking if ID is array or variable
@@ -196,19 +196,19 @@ void evaluate(struct tnode *t){
 			memory[t->left->gEntry->binding+offset] = t->right->boolVal;
 		else
 			memory[t->left->gEntry->binding+offset] = t->right->val;
-  }
-  else if (t->nodeType == READ){											//For Read Statement
+	}
+	else if (t->nodeType == READ){											//For Read Statement
 		int offset = 0;
 		if (t->expr->expr != NULL){
 			evaluate(t->expr->expr);
 			offset = t->expr->expr->val;
 		}
-    scanf("%d", &memory[t->expr->gEntry->binding + offset]);
-  }
-  else if (t->nodeType == WRITE){											//For Write Statement
-    evaluate(t->expr);
-    printf("%d\n", t->expr->val);
-  }
+		scanf("%d", &memory[t->expr->gEntry->binding + offset]);
+	}
+	else if (t->nodeType == WRITE){											//For Write Statement
+		evaluate(t->expr);
+		printf("%d\n", t->expr->val);
+	}
 	else if (t->nodeType == IF){												//For IF Statement
 		evaluate(t->expr);
 		if (t->expr->boolVal == TRUE){
@@ -237,42 +237,42 @@ void evaluate(struct tnode *t){
 		switch (t->nodeType){
 			case PLUS:
 				evaluate(t->left);
-        evaluate(t->right);
-        t->val = t->left->val + t->right->val;
+        		evaluate(t->right);
+        		t->val = t->left->val + t->right->val;
 				break;
 			case SUB:
-        evaluate(t->left);
-        evaluate(t->right);
-        t->val = t->left->val - t->right->val;
-        break;
+		        evaluate(t->left);
+		        evaluate(t->right);
+		        t->val = t->left->val - t->right->val;
+		        break;
 			case MUL:
-        evaluate(t->left);
-        evaluate(t->right);
-        t->val = t->left->val * t->right->val;
-        break;
+		        evaluate(t->left);
+		        evaluate(t->right);
+		        t->val = t->left->val * t->right->val;
+		        break;
 			case DIV:
-        evaluate(t->left);
-        evaluate(t->right);
-        t->val = t->left->val / t->right->val;
-        break;
+		        evaluate(t->left);
+		        evaluate(t->right);
+		        t->val = t->left->val / t->right->val;
+		        break;
 			case LT:
-        evaluate(t->left);
-        evaluate(t->right);
-        k = t->left->val < t->right->val;
+		        evaluate(t->left);
+		        evaluate(t->right);
+		        k = t->left->val < t->right->val;
 				if (k == 1)
 					t->boolVal = TRUE;
 				else
 					t->boolVal = FALSE;
-        break;
+		        break;
 			case GT:
-        evaluate(t->left);
-        evaluate(t->right);
-        k = t->left->val > t->right->val;
+		        evaluate(t->left);
+		        evaluate(t->right);
+		        k = t->left->val > t->right->val;
 				if (k == 1)
 					t->boolVal = TRUE;
 				else
 					t->boolVal = FALSE;
-        break;
+		        break;
 			case LE:
 				evaluate(t->left);
 				evaluate(t->right);
@@ -283,36 +283,36 @@ void evaluate(struct tnode *t){
 					t->boolVal = FALSE;
 				break;
 			case GE:
-        evaluate(t->left);
-        evaluate(t->right);
-        k = t->left->val >= t->right->val;
+		        evaluate(t->left);
+		        evaluate(t->right);
+		        k = t->left->val >= t->right->val;
 				if (k == 1)
 					t->boolVal = TRUE;
 				else
 					t->boolVal = FALSE;
-        break;
+		        break;
 			case EQ:
-        evaluate(t->left);
-        evaluate(t->right);
-        k = t->left->val == t->right->val;
+		        evaluate(t->left);
+		        evaluate(t->right);
+		        k = t->left->val == t->right->val;
 				if (k == 1)
 					t->boolVal = TRUE;
 				else
 					t->boolVal = FALSE;
-        break;
+		        break;
 			case NE:
-        evaluate(t->left);
-        evaluate(t->right);
-        k = t->left->val != t->right->val;
+		        evaluate(t->left);
+		        evaluate(t->right);
+		        k = t->left->val != t->right->val;
 				if (k == 1)
 					t->boolVal = TRUE;
 				else
 					t->boolVal = FALSE;
-        break;
+		        break;
 			case AND:
-        evaluate(t->left);
-        evaluate(t->right);
-        if (t->left->boolVal == TRUE)
+		        evaluate(t->left);
+		        evaluate(t->right);
+		        if (t->left->boolVal == TRUE)
 					p = 1;
 				else
 					p = 0;
@@ -325,10 +325,10 @@ void evaluate(struct tnode *t){
 					t->boolVal = TRUE;
 				else
 					t->boolVal = FALSE;
-        break;
+		        break;
 			case OR:
-        evaluate(t->left);
-        evaluate(t->right);
+		        evaluate(t->left);
+		        evaluate(t->right);
 				if (t->left->boolVal == TRUE)
 					p = 1;
 				else
@@ -342,9 +342,9 @@ void evaluate(struct tnode *t){
 					t->boolVal = TRUE;
 				else
 					t->boolVal = FALSE;
-        break;
+        		break;
 			case NOT:
-        evaluate(t->left);
+        		evaluate(t->left);
 				if (t->left->boolVal == TRUE)
 					p = 1;
 				else
@@ -354,7 +354,7 @@ void evaluate(struct tnode *t){
 					t->boolVal = TRUE;
 				else
 					t->boolVal = FALSE;
-        break;
+        		break;
 			default:
 				printf("Error in evaluation\n");
 				exit(0);

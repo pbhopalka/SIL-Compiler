@@ -1,0 +1,12 @@
+START
+MOV R0, 3
+MOV [2], R0
+IN R0
+MOV [1], R0
+MOV R0, [2]
+MOV R1, [1]
+ADD R0, R1
+MOV [0], R0
+MOV R0, [0]
+OUT R0
+HALT

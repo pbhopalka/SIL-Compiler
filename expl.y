@@ -11,6 +11,7 @@
 	#include "symbolTable.h"
 	#include "ast.c"
 	#include "symbolTable.c"
+	#include "codegen.c"
 
 	int yylex(void);
 	int yyerror(char const *s);
@@ -22,7 +23,7 @@
 %token integer boolean
 %token TRUE FALSE
 %token IF THEN ELSE ENDIF WHILE DO ENDWHILE BREAK
-%token PLUS SUB MUL DIV ASSG
+%token PLUS SUB MUL DIV MOD ASSG
 %token LT GT LE GE EQ NE
 %token AND OR NOT
 %left PLUS SUB
@@ -33,43 +34,43 @@
 %%
 
 prog: declaration body
-		;
+	;
 
 declaration: DECL decllist ENDDECL
-					 ;
-
-decllist: decl decllist
-				|
-				;
-
-decl: integer idlist ';'							{groupGInstall($2, integer);}
-		| boolean idlist ';'							{groupGInstall($2, boolean);}
 		;
 
+decllist: decl decllist
+		|
+		;
+
+decl: integer idlist ';'	{groupGInstall($2, integer);}
+	| boolean idlist ';'	{groupGInstall($2, boolean);}
+	;
+
 idlist: id ',' idlist		{$1->left = $3;$$ = $1;}
-			| id							{$1->left = NULL; $$ = $1;}
-			;
+	| id					{$1->left = NULL; $$ = $1;}
+	;
 
-id : ID								{$1->val = 1;$$ = $1;}
-	 | ID '[' NUM ']'		{$1->val = $3->val;$$ = $1;}
-	 ;
+id : ID						{$1->val = 1;$$ = $1;}
+	| ID '[' NUM ']'		{$1->val = $3->val;$$ = $1;}
+	;
 
-body: BEGIN1 Slist END	{provideMemorySpace();evaluate($2);exit(0);}
-	 ;
+body: BEGIN1 Slist END	{provideMemorySpace();codeGen($2);exit(0);}
+	;
 
 Slist: Stmt Slist       {$$ = makeStatement($1, $2);}
-		 |									{$$ = NULL;}
+	 |					{$$ = NULL;}
      ;
 
-Stmt: loc ASSG expr ';'      	{$$ = makeAssgNode($1, $3);}
-    | READ '(' loc ')' ';'    {$$ = makeIONode(READ, $3);}
-    | WRITE '(' expr ')' ';'  {$$ = makeIONode(WRITE, $3);}
-		| IF '(' expr ')' THEN Slist ELSE Slist ENDIF ';'	{$$ = makeConditionalNode($3, $6, $8);}
-		| IF '(' expr ')' THEN Slist ENDIF ';'						{$$ = makeConditionalNode($3, $6, NULL);}
-		| WHILE '(' expr ')' DO Slist ENDWHILE ';' 				{$$ = makeIterativeNode($3, $6);}
+Stmt: loc ASSG expr ';'      {$$ = makeAssgNode($1, $3);}
+    | READ '(' loc ')' ';'   {$$ = makeIONode(READ, $3);}
+    | WRITE '(' expr ')' ';' {$$ = makeIONode(WRITE, $3);}
+	| IF '(' expr ')' THEN Slist ELSE Slist ENDIF ';'	{$$ = makeConditionalNode($3, $6, $8);}
+	| IF '(' expr ')' THEN Slist ENDIF ';'				{$$ = makeConditionalNode($3, $6, NULL);}
+	| WHILE '(' expr ')' DO Slist ENDWHILE ';' 			{$$ = makeIterativeNode($3, $6);}
     ;
 
-expr: expr PLUS expr 				{$$ = makeOperatorNode(PLUS, $1, $3);}
+expr: expr PLUS expr 					{$$ = makeOperatorNode(PLUS, $1, $3);}
 	| expr SUB expr 					{$$ = makeOperatorNode(SUB, $1, $3);}
 	| expr MUL expr 					{$$ = makeOperatorNode(MUL, $1, $3);}
 	| expr DIV expr 					{$$ = makeOperatorNode(DIV, $1, $3);}
@@ -83,13 +84,13 @@ expr: expr PLUS expr 				{$$ = makeOperatorNode(PLUS, $1, $3);}
 	| expr NE expr						{$$ = makeOperatorNode(NE, $1, $3);}
 	| expr AND expr						{$$ = makeBooleanNode(AND, $1, $3);}
 	| expr OR expr						{$$ = makeBooleanNode(OR, $1, $3);}
-	| NOT expr								{$$ = makeBooleanNode(NOT, $2, NULL);}
+	| NOT expr							{$$ = makeBooleanNode(NOT, $2, NULL);}
 	| NUM          						{$$ = $1;}
-  | loc           					{$$ = $1;}
+	| loc           					{$$ = $1;}
 	;
 
-loc: ID											{$$ = $1;}
-	 | ID '[' expr ']'				{$1->expr = $3; $$ = $1;}
+loc: ID								{$$ = $1;}
+	| ID '[' expr ']'				{$1->expr = $3; $$ = $1;}
 
 %%
 

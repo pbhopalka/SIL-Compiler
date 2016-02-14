@@ -1,14 +1,10 @@
 DECL
-  int a;
-  bool c, d;
+    int a, b;
+    int c;
 ENDDECL
 BEGIN
-c = FALSE;
-write(4);
-if (c) then
-  write(1);
-else
-  write(2);
-endif;
-write(7);
+    a = 3;
+    read(b);
+    c = a + b;
+    write(c);
 END
