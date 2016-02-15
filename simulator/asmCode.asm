@@ -7,6 +7,17 @@ MOV R0, [2]
 MOV R1, [1]
 ADD R0, R1
 MOV [0], R0
+L1:
+MOV R0, [0]
+MOV R1, 10
+LE R0, R1
+JZ R0, L2
 MOV R0, [0]
 OUT R0
+MOV R0, [0]
+MOV R1, 1
+ADD R0, R1
+MOV [0], R0
+JMP L1
+L2:
 HALT

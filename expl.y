@@ -9,6 +9,7 @@
 
 	#include "ast.h"
 	#include "symbolTable.h"
+	#include "errorCheck.c"
 	#include "ast.c"
 	#include "symbolTable.c"
 	#include "codegen.c"

@@ -29,13 +29,13 @@ struct tnode *makeLeaf(int n, int type){
 struct tnode *makeOperatorNode(int op, struct tnode *l, struct tnode *r){
 	if (l->nodeType == ID){
 		if (l->gEntry == NULL){
-			printf("Variable not declared\n");
+			printf("Variable %s not declared\n", l->gEntry->name);
 			exit(1);
 		}
 	}
 	if (r->nodeType == ID){
 		if (r->gEntry == NULL){
-			printf("Variable not declared\n");
+			printf("Variable %s not declared\n", r->gEntry->name);
 			exit(1);
 		}
 	}
@@ -73,6 +73,8 @@ struct tnode *makeID(char *id){
 }
 
 struct tnode *makeAssgNode(struct tnode *l, struct tnode *r){
+	idDeclarationCheck(l);
+	idDeclarationCheck(r);
 	if (l->nodeType != ID){
 		printf("Left side of ASSG has to be a variable.\n");
 		exit(1);
@@ -124,6 +126,7 @@ struct tnode *makeBooleanNode(int op, struct tnode *l, struct tnode *r){
 }
 
 struct tnode *makeIONode(int op, struct tnode *node){ //Using t->expr not t->left or t->right
+	idDeclarationCheck(node);
 	if (node->dataType != integer){
 		printf("Data type for I/O is not integer\n");
 		exit(1);

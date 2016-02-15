@@ -6,5 +6,8 @@ BEGIN
     a = 3;
     read(b);
     c = a + b;
-    write(c);
+    while (c <= 10) do
+        write(c);
+        c = c + 1;
+    endwhile;
 END

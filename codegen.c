@@ -1,5 +1,6 @@
 #include "y.tab.h"
 int regNo = 0;
+int label = 0;
 FILE *filePtr;
 
 int getRegNo(){
@@ -19,8 +20,13 @@ int freeReg(){
     regNo--;
 }
 
+int generateLabel(){
+    label++;
+    return label;
+}
+
 int opCodeGen(tnode *t){
-    printf("Entering for %d\n", t->nodeType);
+    //printf("Entering for %d\n", t->nodeType);
     int r1, r2;
     //int r2 = getRegNo();
     //printf("Register no: %d %d\n", r1, r2);
@@ -111,8 +117,15 @@ int opCodeGen(tnode *t){
 }
 
 int stCodeGen(tnode *t){
+    //printf("Entering for st: %d\n", t->nodeType);
     int r1;
     switch (t->nodeType) {
+        case STMT:
+            while(t != NULL){
+                stCodeGen(t->expr);
+                t = t->left;
+            }
+            break;
         case ASSG:{
             int address = t->left->gEntry->binding;
             r1 = opCodeGen(t->right);
@@ -133,6 +146,33 @@ int stCodeGen(tnode *t){
             fprintf(filePtr, "OUT R%d\n", r1);
             freeReg();
             break;
+        case IF:{
+            int l1 = generateLabel();
+            r1 = opCodeGen(t->expr);
+            fprintf(filePtr, "JZ R%d, L%d\n", r1, l1);
+            freeReg();
+            int l2 = generateLabel();
+            stCodeGen(t->left);
+            fprintf(filePtr, "JMP L%d\n", l2);
+            fprintf(filePtr, "L%d:\n", l1);
+            if (t->right != NULL){
+                stCodeGen(t->right);
+            }
+            fprintf(filePtr, "L%d:\n", l2);
+            break;
+        }
+        case WHILE:{
+            int l1 = generateLabel();
+            int l2 = generateLabel();
+            fprintf(filePtr, "L%d:\n", l1);
+            r1 = opCodeGen(t->expr);
+            fprintf(filePtr, "JZ R%d, L%d\n", r1, l2);
+            freeReg();
+            stCodeGen(t->left);
+            fprintf(filePtr, "JMP L%d\n", l1);
+            fprintf(filePtr, "L%d:\n", l2);
+            break;
+        }
     }
     return 0;
 }
@@ -144,10 +184,7 @@ void codeGen(tnode *t){
         printf("It is not a statement\n");
         exit(0);
     }
-    while(t != NULL){
-        stCodeGen(t->expr);
-        t = t->left;
-    }
+    stCodeGen(t);
     fprintf(filePtr, "HALT\n");
     fclose(filePtr);
     return;
