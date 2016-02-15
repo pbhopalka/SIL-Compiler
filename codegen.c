@@ -40,7 +40,13 @@ int opCodeGen(tnode *t){
         case ID:{
             int address = t->gEntry->binding;
             r1 = getRegNo();
-            fprintf(filePtr, "MOV R%d, [%d]\n", r1, address);
+            fprintf(filePtr, "MOV R%d, %d\n", r1, address);
+            if (t->expr != NULL){
+                int offset = opCodeGen(t->expr);
+                fprintf(filePtr, "ADD R%d, R%d\n", r1, offset);
+                freeReg();
+            }
+            fprintf(filePtr, "MOV R%d, [R%d]\n", r1, r1);
             break;
         }
         case PLUS:
@@ -128,6 +134,13 @@ int stCodeGen(tnode *t){
             break;
         case ASSG:{
             int address = t->left->gEntry->binding;
+            r1 = getRegNo();
+            fprintf(filePtr, "MOV R%d, %d\n", r1, address);
+            if (t->expr != NULL){
+                int offset = opCodeGen(t->expr);
+                fprintf(filePtr, "ADD R%d, R%d\n", r1, offset);
+                freeReg();
+            }
             r1 = opCodeGen(t->right);
             fprintf(filePtr, "MOV [%d], R%d\n", address, r1);
             freeReg();
