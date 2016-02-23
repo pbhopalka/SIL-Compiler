@@ -1,12 +1,9 @@
 DECL
-    int a[2], b;
-    bool c;
+    int b, a;
+    bool c, x;
 ENDDECL
 BEGIN
-    c = TRUE;
-    a[1] = 3;
-    if (c) then
-        write(a[1]);
-    endif;
-    write(a[1]+2);
+    a = 6;
+    b = 4;
+    write(a+b);
 END

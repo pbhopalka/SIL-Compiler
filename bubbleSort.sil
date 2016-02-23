@@ -12,9 +12,9 @@ BEGIN
 		i = i + 1;
 	endwhile;
 	i = 0;
+
 	while (i < 10) do
 		j = 0;
-		x[2] = (a[i] < a[j]) AND TRUE;
 		while (j < 10) do
 			if (a[i] < a[j]) then
 				c = a[i];
