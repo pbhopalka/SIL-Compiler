@@ -1,4 +1,5 @@
 gTable *gStart = NULL;
+extern int lineNo;
 
 void provideMemorySpace(){
   int memOffset = 0;
@@ -11,6 +12,15 @@ void provideMemorySpace(){
 		memOffset += temp->size;
 		temp = temp->next;
 	}
+}
+
+void printSymbolTable(){
+    gTable *temp = gStart;
+    printf("Symbol table\n");
+    while (temp != NULL){
+        printf("%s %d %d\n", temp->name, temp->type, temp->size);
+        temp = temp->next;
+    }
 }
 
 void groupGInstall(tnode *node, int type){
@@ -26,7 +36,7 @@ void gInstall(char *name, int type, int size){
   //printf("Declaring Variable %s\n", name);
   gTable *tempPointer = gSearch(name);
 	if (tempPointer != NULL){
-			printf("Variable %s already declared\n", name);
+			printf("Line: %d :: Variable %s already declared\n", lineNo, name);
 			exit(1);
 	}
   gTable *temp;
