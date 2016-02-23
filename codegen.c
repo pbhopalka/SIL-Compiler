@@ -129,6 +129,10 @@ int opCodeGen(tnode *t){
             fprintf(filePtr, "ADD R%d, R%d\n", r1, r2);
             freeReg();
             break;
+        case NOT:
+            r1 = opCodeGen(t->left);
+            fprintf(filePtr, "EQ R%d, 0\n", r1);
+            break;
         default:
             printf("Error in codegen\n");
             exit(0);
