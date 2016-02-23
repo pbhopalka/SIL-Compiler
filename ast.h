@@ -20,15 +20,18 @@ typedef struct tnode{
 
 // Creates a node for Statement with tnode->expr containing node and tnode->left containing next
 // Called from expl.y when a statement is completed
+// Error checking not required
 struct tnode *makeStatement(struct tnode *node, struct tnode *next);
 
 // Creates a node for leaf node. Can be either integer or boolean type
 // Called from expl.l when a integer value or boolean value is found. Also, in expl.y when creating node for (-expr)
+// Error checking not required
 struct tnode *makeLeaf(int n, int type);
 
 //Creates a node for all operations that deals with integer operands (+, -, *, /, %, <, >, <=, >=, ==, !=)
 //tnode->left and tnode->right is used
 //Called from expl.y after an expression is formed
+//Error-checking is necessary
 struct tnode *makeOperatorNode (int op, struct tnode *left, struct tnode *right);
 
 //Creates a node for boolean operations with boolean operands (AND, OR, NOT)

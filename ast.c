@@ -1,5 +1,6 @@
 #include "y.tab.h"
 int memory[100000];						//Used for memory allocation of variables
+extern int lineNo;
 
 struct tnode *makeStatement(struct tnode *node, struct tnode *next){
 	tnode *temp;
@@ -16,23 +17,25 @@ struct tnode *makeLeaf(int n, int type){
 	temp = (struct tnode*)malloc(sizeof(struct tnode));
 	temp->name = NULL;
 	temp->dataType = type;
-	if (type == integer)
+	if (type == integer){
 		temp->val = n;
-	else
+		temp->boolVal = -1;
+	}
+	else{
 		temp->boolVal = n;
+		temp->val = -1;
+	}
 	temp->nodeType = NUM;
+	temp->expr = NULL;
 	temp->left = NULL;
 	temp->right = NULL;
 	return temp;
 }
 
 struct tnode *makeOperatorNode(int op, struct tnode *l, struct tnode *r){
-	idDeclarationCheck(l);
-	idDeclarationCheck(r);
-	if (l->dataType != integer || r->dataType != integer){
-		printf("Invalid data type declarations\n");
-		exit(1);
-	}
+	//idDeclarationCheck(l);
+	//idDeclarationCheck(r);
+	dataTypeCheck(l, r, integer);
 	struct tnode *temp;
 	temp = (struct tnode*)malloc(sizeof(struct tnode));
 	if (op == GT | op == LT | op == LE | op == GE | op == EQ | op == NE)
@@ -41,6 +44,8 @@ struct tnode *makeOperatorNode(int op, struct tnode *l, struct tnode *r){
 		temp->dataType = integer;
 	temp->name = NULL;
 	temp->nodeType = op;
+	temp->val = -1;
+	temp->expr = NULL;
 	temp->left = l;
 	temp->right = r;
 	return temp;
@@ -63,13 +68,7 @@ struct tnode *makeID(char *id){
 }
 
 struct tnode *makeAssgNode(struct tnode *l, struct tnode *r){
-	idDeclarationCheck(l);
-	idDeclarationCheck(r);
 	dataTypeCheck(l, r, 0);
-	if (l->nodeType != ID){
-		printf("Left side of ASSG has to be a variable.\n");
-		exit(1);
-	}
 	struct tnode *temp;
 	temp = (struct tnode*)malloc(sizeof(struct tnode));
 	temp->dataType = VOID;
@@ -81,30 +80,22 @@ struct tnode *makeAssgNode(struct tnode *l, struct tnode *r){
 }
 
 struct tnode *makeBooleanNode(int op, struct tnode *l, struct tnode *r){
-	idDeclarationCheck(l);
-	if (op != NOT){
-		idDeclarationCheck(r);
+	if (op != NOT)
 		dataTypeCheck(l, r, boolean);
-	}
-	if (l->dataType != boolean){
-		printf("Invalid boolean data type declarations\n");
-		exit(1);
-	}
+	else
+		dataTypeCheck(l, NULL, boolean);
 	struct tnode *temp;
 	temp = (struct tnode*)malloc(sizeof(struct tnode));
 	temp->dataType = boolean;
 	temp->nodeType = op;
+	temp->boolVal = -1;
 	temp->left = l;
 	temp->right = r;
 	return temp;
 }
 
 struct tnode *makeIONode(int op, struct tnode *node){ //Using t->expr not t->left or t->right
-	idDeclarationCheck(node);
-	if (node->dataType != integer){
-		printf("Data type for I/O is not integer\n");
-		exit(1);
-	}
+	dataTypeCheck(node, NULL, integer);
 	tnode *temp;
 	temp = (struct tnode*)malloc(sizeof(tnode));
 	temp->nodeType = op;
@@ -115,10 +106,7 @@ struct tnode *makeIONode(int op, struct tnode *node){ //Using t->expr not t->lef
 }
 
 struct tnode *makeConditionalNode(tnode *expr, tnode *thenPart, tnode *elsePart){
-	if (expr->dataType != boolean){
-		printf("Expression is not of boolean type in IF\n");
-		exit(1);
-	}
+	dataTypeCheck(expr, NULL, boolean);
 	tnode *temp;
 	temp = (tnode*)malloc(sizeof(tnode));
 	temp->nodeType = IF;
@@ -129,10 +117,7 @@ struct tnode *makeConditionalNode(tnode *expr, tnode *thenPart, tnode *elsePart)
 }
 
 struct tnode *makeIterativeNode(tnode *expr, tnode *slist){
-	if (expr->dataType != boolean){
-		printf("Expression is not of boolean type in WHILE\n");
-		exit(1);
-	}
+	dataTypeCheck(expr, NULL, boolean);
 	tnode *temp;
 	temp = (tnode*)malloc(sizeof(tnode));
 	temp->nodeType = WHILE;
@@ -148,7 +133,7 @@ void evaluate(struct tnode *t){
 	}
 	else if(t->nodeType == ID){ 												//For identifiers
 		if (t->gEntry == NULL){
-			printf("Variable %s is not declared\n", t->name);
+			printf("Line: %d :: Variable %s is not declared\n", lineNo, t->name);
 			exit(1);
 		}
 		int offset = 0;
