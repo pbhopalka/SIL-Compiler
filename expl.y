@@ -4,7 +4,7 @@
 	#include <string.h>
 
 	extern FILE *yyin;
-	//extern int lineNo = 1;
+	extern int lineNo;
 
 	#define YYSTYPE tnode *
 
@@ -87,38 +87,17 @@ expr: expr PLUS expr 					{$$ = makeOperatorNode(PLUS, $1, $3);}
 	| expr OR expr						{$$ = makeBooleanNode(OR, $1, $3);}
 	| NOT expr							{$$ = makeBooleanNode(NOT, $2, NULL);}
 	| NUM          						{$$ = $1;}
-	| loc           					{
-											if ($1->gEntry != NULL){
-												if ($1->gEntry->size == 0){
-													printf("%s\n", $1->name);
-													if ($1->expr != NULL){
-														printf("Array has not been declared\n");
-														exit(0);
-													}
-												}
-												else{
-													printf("Else part: %s\n", $1->name);
-													if ($1->expr == NULL){
-														printf("Array has been declared but a variable used\n");
-														exit(0);
-													}
-												}
-											}
-											$$ = $1;}
+	| loc           					{$$ = $1;}
 	;
 
-loc: ID								{$1->expr = NULL;$$ = $1;}
-	| ID '[' expr ']'				{
-										if ($3->dataType != integer){
-											printf("Cannot be boolean index inside an array\n");
-											exit(0);
-										}
-										$1->expr = $3; $$ = $1;}
+loc: ID								{$1->expr = NULL;idDeclarationCheck($1);$$ = $1;}
+	| ID '[' expr ']'				{$1->expr = $3;idDeclarationCheck($1);$$ = $1;}
+	;
 
 %%
 
 int yyerror(char const *s){
-	printf("Error: %s", s);
+	printf("Line: %d :: Error: %s\n", lineNo, s);
 }
 
 int main(int argc, char *argv[]){
