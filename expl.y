@@ -4,6 +4,7 @@
 	#include <string.h>
 
 	extern FILE *yyin;
+	//extern int lineNo = 1;
 
 	#define YYSTYPE tnode *
 
@@ -22,7 +23,6 @@
 %token NUM ID BEGIN1 END
 %token READ WRITE DECL ENDDECL
 %token integer boolean
-%token TRUE FALSE
 %token IF THEN ELSE ENDIF WHILE DO ENDWHILE BREAK
 %token PLUS SUB MUL DIV MOD ASSG
 %token LT GT LE GE EQ NE
@@ -52,7 +52,7 @@ idlist: id ',' idlist		{$1->left = $3;$$ = $1;}
 	| id					{$1->left = NULL; $$ = $1;}
 	;
 
-id : ID						{$1->val = 1;$$ = $1;}
+id : ID						{$1->val = 0;$$ = $1;}
 	| ID '[' NUM ']'		{$1->val = $3->val;$$ = $1;}
 	;
 
@@ -87,11 +87,33 @@ expr: expr PLUS expr 					{$$ = makeOperatorNode(PLUS, $1, $3);}
 	| expr OR expr						{$$ = makeBooleanNode(OR, $1, $3);}
 	| NOT expr							{$$ = makeBooleanNode(NOT, $2, NULL);}
 	| NUM          						{$$ = $1;}
-	| loc           					{$$ = $1;}
+	| loc           					{
+											if ($1->gEntry != NULL){
+												if ($1->gEntry->size == 0){
+													printf("%s\n", $1->name);
+													if ($1->expr != NULL){
+														printf("Array has not been declared\n");
+														exit(0);
+													}
+												}
+												else{
+													printf("Else part: %s\n", $1->name);
+													if ($1->expr == NULL){
+														printf("Array has been declared but a variable used\n");
+														exit(0);
+													}
+												}
+											}
+											$$ = $1;}
 	;
 
-loc: ID								{$$ = $1;}
-	| ID '[' expr ']'				{$1->expr = $3; $$ = $1;}
+loc: ID								{$1->expr = NULL;$$ = $1;}
+	| ID '[' expr ']'				{
+										if ($3->dataType != integer){
+											printf("Cannot be boolean index inside an array\n");
+											exit(0);
+										}
+										$1->expr = $3; $$ = $1;}
 
 %%
 

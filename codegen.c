@@ -1,7 +1,5 @@
 #include "y.tab.h"
-int regNo = 0;
-int label = 0;
-FILE *filePtr;
+#include "codegen.h"
 
 int getRegNo(){
     if (regNo >= 7){
@@ -32,7 +30,11 @@ int opCodeGen(tnode *t){
     //printf("Register no: %d %d\n", r1, r2);
     switch (t->nodeType) {
         case NUM:{
-            int value = t->val;
+            int value;
+            if (t->dataType == integer)
+                value = t->val;
+            else
+                value = t->boolVal;
             r1 = getRegNo();
             fprintf(filePtr, "MOV R%d, %d\n", r1, value);
             break;
@@ -115,6 +117,18 @@ int opCodeGen(tnode *t){
             fprintf(filePtr, "NE R%d, R%d\n", r1, r2);
             freeReg();
             break;
+        case AND:
+            r1 = opCodeGen(t->left);
+            r2 = opCodeGen(t->right);
+            fprintf(filePtr, "MUL R%d, R%d\n", r1, r2);
+            freeReg();
+            break;
+        case OR:
+            r1 = opCodeGen(t->left);
+            r2 = opCodeGen(t->right);
+            fprintf(filePtr, "ADD R%d, R%d\n", r1, r2);
+            freeReg();
+            break;
         default:
             printf("Error in codegen\n");
             exit(0);
@@ -136,21 +150,30 @@ int stCodeGen(tnode *t){
             int address = t->left->gEntry->binding;
             r1 = getRegNo();
             fprintf(filePtr, "MOV R%d, %d\n", r1, address);
-            if (t->expr != NULL){
-                int offset = opCodeGen(t->expr);
+            if (t->left->expr != NULL){
+                int offset = opCodeGen(t->left->expr);
                 fprintf(filePtr, "ADD R%d, R%d\n", r1, offset);
                 freeReg();
             }
-            r1 = opCodeGen(t->right);
-            fprintf(filePtr, "MOV [%d], R%d\n", address, r1);
+            int r2 = opCodeGen(t->right);
+            fprintf(filePtr, "MOV [R%d], R%d\n", r1, r2);
+            freeReg();
             freeReg();
             break;
         }
         case READ:{
             int address = t->expr->gEntry->binding;
             r1 = getRegNo();
-            fprintf(filePtr, "IN R%d\n", r1);
-            fprintf(filePtr, "MOV [%d], R%d\n", address, r1);
+            fprintf(filePtr, "MOV R%d, %d\n", r1, address);
+            if (t->expr->expr != NULL){
+                int offset = opCodeGen(t->expr->expr);
+                fprintf(filePtr, "ADD R%d, R%d\n", r1, offset);
+                freeReg();
+            }
+            int r2 = getRegNo();
+            fprintf(filePtr, "IN R%d\n", r2);
+            fprintf(filePtr, "MOV [R%d], R%d\n", r1, r2);
+            freeReg();
             freeReg();
             break;
         }

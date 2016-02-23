@@ -6,6 +6,8 @@ void provideMemorySpace(){
 	temp = gStart;
 	while(temp != NULL){
 		temp->binding = memOffset;
+        if (temp->size == 0)
+            memOffset += 1;
 		memOffset += temp->size;
 		temp = temp->next;
 	}

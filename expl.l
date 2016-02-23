@@ -7,6 +7,7 @@
 	#include "y.tab.h"
 
 	int number;
+	int lineNo = 1;
 	int yyerror();
 %}
 
@@ -26,44 +27,37 @@ digit [0-9]+
 ">="		{return GE;}
 "=="		{return EQ;}
 "!="		{return NE;}
-"read"  {return READ;}
-"write" {return WRITE;}
-"BEGIN" {return BEGIN1;}
-"END" 	{return END;}
-"DECL"	{return DECL;}
-"ENDDECL" {return ENDDECL;}
+"read"  	{return READ;}
+"write" 	{return WRITE;}
+"BEGIN" 	{return BEGIN1;}
+"END" 		{return END;}
+"DECL"		{return DECL;}
+"ENDDECL" 	{return ENDDECL;}
 "int"		{return integer;}
-"bool"	{return boolean;}
+"bool"		{return boolean;}
 "if"		{return IF;}
-"then" 	{return THEN;}
-"else" 	{return ELSE;}
-"endif"	{return ENDIF;}
-"while"	{return WHILE;}
+"then" 		{return THEN;}
+"else" 		{return ELSE;}
+"endif"		{return ENDIF;}
+"while"		{return WHILE;}
 "do"		{return DO;}
 "endwhile"	{return ENDWHILE;}
 "AND"		{return AND;}
 "OR"		{return OR;}
 "NOT"		{return NOT;}
-"TRUE"	{yylval = makeLeaf(TRUE, boolean);return NUM;}
-"FALSE"	{yylval = makeLeaf(FALSE, boolean);return NUM;}
+"TRUE"		{yylval = makeLeaf(1, boolean);return NUM;}
+"FALSE"		{yylval = makeLeaf(0, boolean);return NUM;}
 
-{letter}({letter}|{digit})*   {
-          											yylval = makeID(yytext);
-          											return ID;
-        											}
-{digit}  {
-					number = atoi(yytext);
-      		yylval = makeLeaf(number, integer);
-					return NUM;
-	   		}
-[ \t] 	{}
-[;]   	{return *yytext;}
+{letter}({letter}|{digit})*   {yylval = makeID(yytext);return ID;}
+{digit}  	{number = atoi(yytext); yylval = makeLeaf(number, integer); return NUM;}
+[ \t] 		{}
+[;]   		{return *yytext;}
 [,]			{return *yytext;}
 [()] 		{return *yytext;}
 "["			{return *yytext;}
 "]"			{return *yytext;}
-[\n] 		{}
-. 			{yyerror("Unknown character.\n");}
+[\n] 		{lineNo++;}
+. 			{yyerror("Line: %d :: Unknown character.\n", lineNo);}
 
 %%
 

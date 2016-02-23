@@ -27,18 +27,8 @@ struct tnode *makeLeaf(int n, int type){
 }
 
 struct tnode *makeOperatorNode(int op, struct tnode *l, struct tnode *r){
-	if (l->nodeType == ID){
-		if (l->gEntry == NULL){
-			printf("Variable %s not declared\n", l->gEntry->name);
-			exit(1);
-		}
-	}
-	if (r->nodeType == ID){
-		if (r->gEntry == NULL){
-			printf("Variable %s not declared\n", r->gEntry->name);
-			exit(1);
-		}
-	}
+	idDeclarationCheck(l);
+	idDeclarationCheck(r);
 	if (l->dataType != integer || r->dataType != integer){
 		printf("Invalid data type declarations\n");
 		exit(1);
@@ -75,12 +65,9 @@ struct tnode *makeID(char *id){
 struct tnode *makeAssgNode(struct tnode *l, struct tnode *r){
 	idDeclarationCheck(l);
 	idDeclarationCheck(r);
+	dataTypeCheck(l, r, 0);
 	if (l->nodeType != ID){
 		printf("Left side of ASSG has to be a variable.\n");
-		exit(1);
-	}
-	if (l->dataType != r->dataType){
-		printf("Both sides of ASSG is not of same data type\n");
 		exit(1);
 	}
 	struct tnode *temp;
@@ -94,23 +81,10 @@ struct tnode *makeAssgNode(struct tnode *l, struct tnode *r){
 }
 
 struct tnode *makeBooleanNode(int op, struct tnode *l, struct tnode *r){
-	if (l->nodeType == ID){
-		if (l->gEntry == NULL){
-			printf("Boolean Variable not declared\n");
-			exit(1);
-		}
-	}
+	idDeclarationCheck(l);
 	if (op != NOT){
-		if (r->nodeType == ID){
-			if (r->gEntry == NULL){
-				printf("Boolean Variable not declared\n");
-				exit(1);
-			}
-		}
-		if (l->dataType != boolean || r->dataType != boolean){
-			printf("Invalid boolean data type declarations\n");
-			exit(1);
-		}
+		idDeclarationCheck(r);
+		dataTypeCheck(l, r, boolean);
 	}
 	if (l->dataType != boolean){
 		printf("Invalid boolean data type declarations\n");
