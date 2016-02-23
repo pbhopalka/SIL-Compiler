@@ -3,8 +3,6 @@ DECL
   bool c;
 ENDDECL
 BEGIN
-  a[1]=4;
-  a[2] = 2;
   c = TRUE;
   i = 0;
   b = 0;
