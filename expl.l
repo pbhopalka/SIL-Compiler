@@ -33,8 +33,8 @@ digit [0-9]+
 "END" 		{return END;}
 "DECL"		{return DECL;}
 "ENDDECL" 	{return ENDDECL;}
-"int"		{return integer;}
-"bool"		{return boolean;}
+"integer"	{return integer;}
+"boolean"	{return boolean;}
 "if"		{return IF;}
 "then" 		{return THEN;}
 "else" 		{return ELSE;}
