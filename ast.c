@@ -3,17 +3,17 @@ int memory[100000];						//Used for memory allocation of variables
 extern int lineNo;
 
 struct tnode *makeFunctionNode(tnode *id, int type, tnode *argList, tnode *decl, tnode *body){
+	checkReturnType(type, body->right->dataType);
+	checkArgumentType(argList); //see if arguments does not contain arrays or functions
+	checkFunctionDecl(id->name, type, argList);
 	tnode *temp;
 	temp = (tnode*)malloc(sizeof(tnode));
 	temp->name = id->name;
 	temp->nodeType = FUNC;
 	temp->dataType = type;
 	temp->expr = argList;
+	temp->left = body;
 	temp->gEntry = gSearch(id->name);
-	if (temp->gEntry == NULL){
-		printf("Line: %d :: Function %s has not been declared\n", lineNo, id->name);
-		exit(0);
-	}
 	temp->lEntry = decl->lEntry;
 	return temp;
 }

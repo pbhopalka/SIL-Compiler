@@ -15,7 +15,7 @@ typedef struct tnode{
 	char *name; //if the node is a variable, to store the variable name
 	struct tnode *expr; //pointer to another expression (used in IF, WHILE, STMT, READ, WRITE).. Also for function args
 	struct tnode *left; //pointer to left node(used in IF, WHILE, boolOP, operator, ASSG, STMT)
-	struct tnode *right; //pointer to right node (used in IF, boolOP, operator, ASSG)
+	struct tnode *right; //pointer to right node (used in IF, boolOP, operator, ASSG). Also used for return exp for Slist
 	struct gTable *gEntry; //for the location in the symbol table entry if node is a variable
 	struct lTable *lEntry;
 }tnode;
