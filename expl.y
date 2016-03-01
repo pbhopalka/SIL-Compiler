@@ -37,7 +37,7 @@
 prog: declaration funcDef	{provideMemorySpace();printSymbolTable();exit(0);}
 	;
 
-declaration: DECL decllist ENDDECL {printSymbolTable();}
+declaration: DECL decllist ENDDECL
 		;
 
 decllist: decl decllist
@@ -58,7 +58,7 @@ id : ID						{$1->val = 0;$1->nodeType = STMT;$$ = $1;}
 	;
 
 funcDef: funcList funcDef	{$1->left = $2;$$ = $1;}
-		|					{$$ = NULL;}
+		| funcList			{$$ = $1;}
 		;
 
 funcList: integer ID '(' argument ')' '{' localDecl body'}' {$$ = makeFunctionNode($2, integer, $4, $7, $8);}
@@ -66,31 +66,35 @@ funcList: integer ID '(' argument ')' '{' localDecl body'}' {$$ = makeFunctionNo
 		;
 
 
-argument: argList argument	{$1->left = $2; $$ = $1;}
-		|					{$$ = NULL;}
+argument: argList 	{$$ = $1;} /*Missing pass by reference */
+		|			{$$ = NULL;}
 		;
 
-argList: arg ';' argList	{$1->left = $3; $$ = $1;}
-		| arg				{$1->left = NULL; $$ = $1;}
+argList: arg ';' argList	{$1->right = $3; $$ = $1;}
+		| arg				{$1->right = NULL; $$ = $1;}
 		;
 
 arg: integer idlist 	{$2->dataType = integer;$$ = $2;}
 	| boolean idlist 	{$2->dataType = boolean;$$ = $2;}
 	;
 
-localDecl: DECL lDeclare ENDDECL {$$ = $2;}
+localDecl: DECL lDeclare ENDDECL 	{$$ = $2;}
+		|							{$$ = NULL;}
 		;
 
 lDeclare: lDec lDeclare		{$1->left = $2; $$ = $1;}
 		|					{$$ = NULL;}
 		;
 
-lDec: integer idlist ';'	{tnode *temp;temp = (tnode*)malloc(sizeof(tnode));temp->lEntry = groupLInstall($2, integer);$$ = temp;}
-	| boolean idlist ';'	{tnode *temp;temp = (tnode*)malloc(sizeof(tnode));temp->lEntry = groupLInstall($2, boolean);$$ = temp;}
+lDec: integer idlist ';'	{checkArgumentType($2);tnode *temp;temp = (tnode*)malloc(sizeof(tnode));temp->lEntry = groupLInstall($2, integer);$$ = temp;}
+	| boolean idlist ';'	{checkArgumentType($2);tnode *temp;temp = (tnode*)malloc(sizeof(tnode));temp->lEntry = groupLInstall($2, boolean);$$ = temp;}
 	;
 
-body: BEGIN1 Slist END
+body: BEGIN1 Slist ret END 	{$2->right = $3; $$ = $2;}
+	| BEGIN1 Slist END		{printf("Line : %d :: Return statement missing\n", lineNo);exit(0);}
 	;
+
+ret: RETURN expr ';' 	{$$ = $2;}
 
 Slist: Stmt Slist       {$$ = makeStatement($1, $2);}
 	 |					{$$ = NULL;}
@@ -102,7 +106,7 @@ Stmt: loc ASSG expr ';' 		{$$ = makeAssgNode($1, $3);}
 	| IF '(' expr ')' THEN Slist ELSE Slist ENDIF ';'	{$$ = makeConditionalNode($3, $6, $8);}
 	| IF '(' expr ')' THEN Slist ENDIF ';'				{$$ = makeConditionalNode($3, $6, NULL);}
 	| WHILE '(' expr ')' DO Slist ENDWHILE ';' 			{$$ = makeIterativeNode($3, $6);}
-	| RETURN expr ';'		 	 /*Check if type is same and check if it is the last statement of the body*/
+ /*Check if type is same and check if it is the last statement of the body*/
     ;
 
 expr: expr PLUS expr 					{$$ = makeOperatorNode(PLUS, $1, $3);}
@@ -138,6 +142,7 @@ exprList: expr ',' exprList			{$1->left = $3; $$ = $1;}
 
 int yyerror(char const *s){
 	printf("Line: %d :: Error: %s\n", lineNo, s);
+	exit(0);
 }
 
 int main(int argc, char *argv[]){

@@ -27,14 +27,19 @@ void printSymbolTable(){
 
 struct argList *makeArgList(tnode *node){
     argList *temp, *start;
+    tnode *temp1;
     start = NULL;
     while(node != NULL){
-        temp = (argList*)malloc(sizeof(argList));
-        temp->name = node->name;
-        temp->type = node->dataType;
-        temp->next = start;
-        start = temp;
-        node = node->left;
+        temp1 = node;
+        while(temp1 != NULL){
+            temp = (argList*)malloc(sizeof(argList));
+            temp->name = temp1->name;
+            temp->type = temp1->dataType;
+            temp->next = start;
+            start = temp;
+            temp1 = temp1->left;
+        }
+        node = node->right;
     }
     return start;
 }
