@@ -47,7 +47,7 @@ digit [0-9]+
 "NOT"		{return NOT;}
 "TRUE"		{yylval = makeLeaf(1, boolean);return NUM;}
 "FALSE"		{yylval = makeLeaf(0, boolean);return NUM;}
-
+"return"	{return RETURN;}
 {letter}({letter}|{digit})*   {yylval = makeID(yytext);return ID;}
 {digit}  	{number = atoi(yytext); yylval = makeLeaf(number, integer); return NUM;}
 [ \t] 		{}
