@@ -15,12 +15,12 @@ integer add(integer a, c){
 
 integer main(){
   DECL
-    int c;
+    integer c;
   ENDDECL
   BEGIN
-    a = 3;
-    read(c);
-    b = add(a, c);
+    read(a);
+    c = 3;
+    b = a + c;
     write(b);
     return 0;
   END
