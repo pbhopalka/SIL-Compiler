@@ -13,4 +13,6 @@ int opCodeGen(tnode *node); //Code Generation for all operations and expressions
 
 int stCodeGen(tnode *node); //Code Generation for all statements(IF, WHILE, ASSG, READ, WRITE, STMT)
 
+void funcCodeGen(tnode *node);
+
 void codeGen(tnode *node); //Driving function for code generation. Opens up the filePtr and calls stCodeGen then closes the File

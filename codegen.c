@@ -51,6 +51,10 @@ int opCodeGen(tnode *t){
             fprintf(filePtr, "MOV R%d, [R%d]\n", r1, r1);
             break;
         }
+        case CALL:{
+            fprintf(filePtr, "CALL %s\n", t->name);
+            break;
+        }
         case PLUS:
             r1 = opCodeGen(t->left);
             r2 = opCodeGen(t->right);
@@ -217,15 +221,45 @@ int stCodeGen(tnode *t){
     return 0;
 }
 
+void funcCodeGen(tnode *node){
+    lTable *table = node->left->link;
+    while(node != NULL){
+        provideMemoryToLocal(node->left->link);
+        fprintf(filePtr, "//Code Gen for %s function\n", node->name);
+        fprintf(filePtr, "%s:\n", node->name);
+        tnode *temp = node->left;
+        while (temp != NULL){
+            stCodeGen(temp);
+            temp = temp->left;
+        }
+        fprintf(filePtr, "\n");
+        cleanLocalMemory(node->left->link);
+        node = node->right;
+    }
+    return;
+}
+
 void codeGen(tnode *t){
     filePtr = fopen("simulator/asmCode.asm", "w+");
     fprintf(filePtr, "START\n");
-    if (t->nodeType != STMT){
-        printf("It is not a statement\n");
-        exit(0);
+    fprintf(filePtr, "MOV BP, 0\n");
+    fprintf(filePtr, "MOV SP, %d\n", memory);
+    int i = 0;
+    while (i < regNo){
+        fprintf(filePtr, "PUSH R%d\n", i);
+        i++;
     }
-    stCodeGen(t);
+    fprintf(filePtr, "CALL main\n");
+    while (i > 0){
+        fprintf(filePtr, "POP R%d\n", i);
+        i--;
+    }
     fprintf(filePtr, "HALT\n");
+    fprintf(filePtr, "\n");
+    while (t != NULL){
+        funcCodeGen(t);
+        t = t->right;
+    }
     fclose(filePtr);
     return;
 }
