@@ -1,13 +1,17 @@
+int memory = 0;
+
 typedef struct argList{
     char *name;
     int type;
+    int passByRef;
     struct argList *next;
 } argList;
 
 /* For the Global Symbol Table for global declaraions */
 typedef struct gTable{
   char *name;
-  int type;
+  int type; //Data type
+  int nodeType; //for saying if its a variable, array or a function
   int size;
   int binding;
   struct argList *arg;
@@ -19,13 +23,22 @@ typedef struct gTable{
 typedef struct lTable{
     char *name;
     int type;
+    int bindingType; //either TRUE or FALSE for pass by reference
     int binding;
     struct lTable *next;
 } lTable;
 
-void provideMemorySpace(); //Providing binding location during runtime
+void provideMemoryToGlobal(); //Providing binding location during runtime
+
+void provideMemoryToLocal(lTable *table);
+
+void cleanLocalMemory(lTable *table);
 
 void printSymbolTable(); //Function to print symbol table (For debugging purposes)
+
+void printLocalSymTable(char *name); //Function to print the local symbol table of name function (For debugging purposes)
+
+tnode *addDataType(int type, tnode *node); //Function to add datatypes in node->dataType. Used in expl.y during arg: integer argInput
 
 argList *makeArgList(tnode *node);
 
@@ -41,8 +54,10 @@ void gInstall(char *name, int type, int size);
 
 /*Functions for the Local Symbol Table */
 
-lTable *groupLInstall(tnode *node, int type);
+void *argLInstall(tnode *node);
 
-lTable *lSearch(lTable *table, char *name);
+void *groupLInstall(tnode *node, int type);
 
-lTable *lInstall(lTable *table, char *name, int type);
+lTable *lSearch(char *name);
+
+lTable *lInstall(char *name, int type, int passByRef);

@@ -1,28 +1,67 @@
 gTable *gStart = NULL;
+lTable *lStart = NULL;
 extern int lineNo;
 
-void provideMemorySpace(){
-    int memOffset = 0;
+void provideMemoryToGlobal(){
 	gTable *temp;
 	temp = gStart;
 	while(temp != NULL){
-        if (temp->arg == NULL){
-            temp->binding = memOffset;
+        if (temp->nodeType == VAR){
+            temp->binding = memory;
             if (temp->size == 0)
-                memOffset += 1;
-    		memOffset += temp->size;
+                memory += 1;
+    		memory += temp->size;
         }
+		temp = temp->next;
+	}
+}
+
+void provideMemoryToLocal(lTable *table){
+	lTable *temp;
+	temp = table;
+	while (temp != NULL){
+		temp->binding = memory;
+		memory += 1;
+		temp = temp->next;
+	}
+}
+
+void cleanLocalMemory(lTable *table){
+	lTable *temp;
+	temp = table;
+	while (temp != NULL){
+		memory -= 1;
 		temp = temp->next;
 	}
 }
 
 void printSymbolTable(){
     gTable *temp = gStart;
-    printf("Symbol table\n");
+    printf("Global Symbol table\n");
     while (temp != NULL){
         printf("%s %d %d\n", temp->name, temp->type, temp->size);
         temp = temp->next;
     }
+    printf("\n");
+}
+
+void printLocalSymTable(char *name){
+    lTable *temp = lStart;
+    printf("Local Symbol table for %s function\n", name);
+    while (temp != NULL){
+        printf("%s %d\n", temp->name, temp->type);
+        temp = temp->next;
+    }
+    printf("\n");
+}
+
+tnode *addDataType(int type, tnode *node){
+	tnode *temp = node;
+	while(node != NULL){
+		node->dataType = type;
+		node = node->left;
+	}
+	return temp;
 }
 
 struct argList *makeArgList(tnode *node){
@@ -35,6 +74,7 @@ struct argList *makeArgList(tnode *node){
             temp = (argList*)malloc(sizeof(argList));
             temp->name = temp1->name;
             temp->type = temp1->dataType;
+			temp->passByRef = temp1->passByRef;
             temp->next = start;
             start = temp;
             temp1 = temp1->left;
@@ -67,6 +107,7 @@ void fInstall(char *name, int type, tnode *arguments){
     temp = (gTable*)malloc(sizeof(gTable));
     temp->name = name;
     temp->type = type;
+	temp->nodeType = FUNC;
     temp->arg = makeArgList(arguments);
     temp->next = gStart;
     gStart = temp;
@@ -83,6 +124,7 @@ void gInstall(char *name, int type, int size){
   temp = (gTable*)malloc(sizeof(gTable));
   temp->name = name;
   temp->type = type;
+  temp->nodeType = VAR;
   temp->size = size;
   temp->arg = NULL;
   temp->next = gStart;
@@ -101,28 +143,36 @@ gTable *gSearch(char *name){
   return NULL;
 }
 
-lTable *groupLInstall(tnode *node, int type){
-    lTable *temp = NULL;
-    while (node != NULL){
-        lTable *temp2 = lInstall(temp, node->name, type);
-        temp2->next = temp;
-        temp = temp2;
-        node = node->left;
+void *argLInstall(tnode *node){
+    tnode *temp = node;
+    while (temp != NULL){
+        groupLInstall(temp, temp->dataType);
+        temp = temp->right;
     }
-    return temp;
 }
 
-lTable *lSearch(lTable *lSymbol, char *name){
-    while(lSymbol != NULL){
-        if (strcmp(lSymbol->name, name) == 0)
-            return lSymbol;
-        lSymbol = lSymbol->next;
+void *groupLInstall(tnode *node, int type){
+    tnode *temp = node;
+    while (temp != NULL){
+        lTable *temp2 = lInstall(temp->name, type, temp->passByRef);
+        temp2->next = lStart;
+        lStart = temp2;
+        temp = temp->left;
+    }
+}
+
+lTable *lSearch(char *name){
+    lTable *temp = lStart;
+    while(temp != NULL){
+        if (strcmp(temp->name, name) == 0)
+            return temp;
+        temp = temp->next;
     }
     return NULL;
 }
 
-lTable *lInstall(lTable *table, char *name, int type){
-    lTable *tempPointer = lSearch(table, name);
+lTable *lInstall(char *name, int type, int passByRef){
+    lTable *tempPointer = lSearch(name);
   	if (tempPointer != NULL){
   			printf("Line: %d :: Variable %s already declared in local scope\n", lineNo, name);
   			exit(1);
@@ -131,5 +181,6 @@ lTable *lInstall(lTable *table, char *name, int type){
     temp = (lTable*)malloc(sizeof(lTable));
     temp->name = name;
     temp->type = type;
+    temp->bindingType = passByRef;
     return temp;
 }
