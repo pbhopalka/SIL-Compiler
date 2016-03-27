@@ -34,10 +34,10 @@
 
 %%
 
-prog: declaration funcDef	{provideMemorySpace();printSymbolTable();exit(0);}
+prog: declaration funcDef	{printSymbolTable();exit(0);}
 	;
 
-declaration: DECL decllist ENDDECL
+declaration: DECL decllist ENDDECL 	{provideMemoryToGlobal();}
 		;
 
 decllist: decl decllist
@@ -52,21 +52,31 @@ idlist: id ',' idlist		{$1->left = $3;$$ = $1;}
 	| id					{$1->left = NULL; $$ = $1;}
 	;
 
-id : ID						{$1->val = 0;$1->nodeType = STMT;$$ = $1;}
+id : ID						{$1->passByRef = FALSE;$1->val = 0;$1->nodeType = STMT;$$ = $1;}
 	| ID '[' NUM ']'		{$1->val = $3->val;$1->nodeType = STMT;$$ = $1;}
-	| ID '(' argument ')'	{$1->expr = $3;$1->nodeType = FUNC;$$ = $1;} //This should not happen in function declaration
+	| ID '(' initArg ')'	{$1->expr = $3;$1->nodeType = FUNC;$$ = $1;} //This should not happen in function declaration
 	;
 
-funcDef: funcList funcDef	{$1->left = $2;$$ = $1;}
-		| funcList			{$$ = $1;}
+initArg: argList	{$$ = $1;}
+		|			{$$ = NULL;}
 		;
 
-funcList: integer ID '(' argument ')' '{' localDecl body'}' {$$ = makeFunctionNode($2, integer, $4, $7, $8);}
-		| boolean ID '(' argument ')' '{' localDecl body'}'	{$$ = makeFunctionNode($2, boolean, $4, $7, $8);}
+funcDef: funcList funcDef	{$1->right = $2;$$ = $1;}
+		| funcList			{$1->right = NULL;$$ = $1;}
 		;
 
+funcList: funcHead funcBody 	{printLocalSymTable($1->name);checkReturnType($1->dataType, $2->right->dataType);
+								$1->left = $2;$$ = $1;lStart = NULL;}
+		;
 
-argument: argList 	{$$ = $1;} /*Missing pass by reference */
+funcHead: integer ID '(' argument ')' '{'  {$$ = makeFunctionNode($2, integer, $4, NULL);}
+		| boolean ID '(' argument ')' '{'  {$$ = makeFunctionNode($2, boolean, $4, NULL);}
+		;
+
+funcBody: localDecl body '}'	{$2->lEntry = lStart;$$ = $2;}
+		;
+
+argument: argList 	{argLInstall($1);$$ = $1;}
 		|			{$$ = NULL;}
 		;
 
@@ -74,20 +84,28 @@ argList: arg ';' argList	{$1->right = $3; $$ = $1;}
 		| arg				{$1->right = NULL; $$ = $1;}
 		;
 
-arg: integer idlist 	{$2->dataType = integer;$$ = $2;}
-	| boolean idlist 	{$2->dataType = boolean;$$ = $2;}
+arg: integer argInput	{$$ = addDataType(integer, $2);} /*checkArgumentType() is called by makeFunctionNode()*/
+	| boolean argInput	{$$ = addDataType(boolean, $2);}
 	;
 
-localDecl: DECL lDeclare ENDDECL 	{$$ = $2;}
-		|							{$$ = NULL;}
+argInput: argID ',' argInput	{$1->left = $3;$$ = $1;}
+		| argID					{$1->left = NULL;$$ = $1;}
 		;
 
-lDeclare: lDec lDeclare		{$1->left = $2; $$ = $1;}
-		|					{$$ = NULL;}
+argID: '&' ID	{$2->passByRef = TRUE;$2->val = 0;$2->nodeType = STMT;$$ = $2;}
+	| ID		{$1->passByRef = FALSE;$1->val = 0;$1->nodeType = STMT;$$ = $1;}
+	;
+
+localDecl: DECL lDeclare ENDDECL
+		|
 		;
 
-lDec: integer idlist ';'	{checkArgumentType($2);tnode *temp;temp = (tnode*)malloc(sizeof(tnode));temp->lEntry = groupLInstall($2, integer);$$ = temp;}
-	| boolean idlist ';'	{checkArgumentType($2);tnode *temp;temp = (tnode*)malloc(sizeof(tnode));temp->lEntry = groupLInstall($2, boolean);$$ = temp;}
+lDeclare: lDec lDeclare
+		|
+		;
+
+lDec: integer idlist ';'	{checkArgumentType($2);groupLInstall($2, integer);}
+	| boolean idlist ';'	{checkArgumentType($2);groupLInstall($2, boolean);}
 	;
 
 body: BEGIN1 Slist ret END 	{$2->right = $3; $$ = $2;}
@@ -106,7 +124,6 @@ Stmt: loc ASSG expr ';' 		{$$ = makeAssgNode($1, $3);}
 	| IF '(' expr ')' THEN Slist ELSE Slist ENDIF ';'	{$$ = makeConditionalNode($3, $6, $8);}
 	| IF '(' expr ')' THEN Slist ENDIF ';'				{$$ = makeConditionalNode($3, $6, NULL);}
 	| WHILE '(' expr ')' DO Slist ENDWHILE ';' 			{$$ = makeIterativeNode($3, $6);}
- /*Check if type is same and check if it is the last statement of the body*/
     ;
 
 expr: expr PLUS expr 					{$$ = makeOperatorNode(PLUS, $1, $3);}
@@ -126,15 +143,15 @@ expr: expr PLUS expr 					{$$ = makeOperatorNode(PLUS, $1, $3);}
 	| NOT expr							{$$ = makeBooleanNode(NOT, $2, NULL);}
 	| NUM          						{$$ = $1;}
 	| loc           					{$$ = $1;}
-	| ID '(' exprList ')'				{}
 	;
 
 loc: ID								{$1->expr = NULL;idDeclarationCheck($1);$$ = $1;}
-	| ID '[' expr ']'				{$1->expr = $3;idDeclarationCheck($1);$$ = $1;}
+	| ID '[' expr ']'				{$1->lEntry = NULL;$1->expr = $3;idDeclarationCheck($1);$$ = $1;}
+	| ID '(' exprList ')'			{idDeclarationCheck($1);checkPassedArgument($1, $3);$$ = makeFunctionCall($1, $3);}
 	;
 
-exprList: expr ',' exprList			{$1->left = $3; $$ = $1;}
-		| expr						{$1->left = NULL; $$ = $1;}
+exprList: expr ',' exprList			{$1->expr = $3; $$ = $1;}
+		| expr						{$1->expr = NULL; $$ = $1;}
 		|							{$$ = NULL;}
 		;
 

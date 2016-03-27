@@ -55,6 +55,7 @@ digit [0-9]+
 [{}]		{return *yytext;}
 "["			{return *yytext;}
 "]"			{return *yytext;}
+"&"			{return *yytext;}
 {letter}({letter}|{digit})*   {yylval = makeID(yytext);return ID;}
 {digit}  	{number = atoi(yytext); yylval = makeLeaf(number, integer); return NUM;}
 
