@@ -34,7 +34,7 @@
 
 %%
 
-prog: declaration funcDef	{printSymbolTable();exit(0);}
+prog: declaration funcDef	{printSymbolTable();codeGen($2);exit(0);}
 	;
 
 declaration: DECL decllist ENDDECL 	{provideMemoryToGlobal();}

@@ -40,17 +40,21 @@ int opCodeGen(tnode *t){
             break;
         }
         case ID:{
+            printf("Enter ID\n");
             int address;
-            if (t->left->lEntry == NULL){
-                address = t->left->gEntry->binding;
+            if (t->lEntry == NULL){
+                address = t->gEntry->binding;
                 r1 = getRegNo();
                 fprintf(filePtr, "MOV R%d, %d\n", r1, address);
             }
             else{
-                address = t->left->lEntry_>binding;
+                address = t->lEntry->binding;
                 r1 = getRegNo();
+                int r = getRegNo();
                 fprintf(filePtr, "MOV R%d, BP\n", r1);
-                fprintf(filePtr, "ADD R%d, %d\n", r1, address);
+                fprintf(filePtr, "MOV R%d, %d\n", r, address);
+                fprintf(filePtr, "ADD R%d, R%d\n", r1, r);
+                freeReg();
             }
             if (t->expr != NULL){
                 int offset = opCodeGen(t->expr);
@@ -154,7 +158,7 @@ int opCodeGen(tnode *t){
 }
 
 int stCodeGen(tnode *t){
-    //printf("Entering for st: %d\n", t->nodeType);
+    printf("Entering for st: %d\n", t->nodeType);
     int r1;
     switch (t->nodeType) {
         case STMT:
@@ -171,17 +175,22 @@ int stCodeGen(tnode *t){
                 fprintf(filePtr, "MOV R%d, %d\n", r1, address);
             }
             else{
-                address = t->left->lEntry_>binding;
+                address = t->left->lEntry->binding;
                 r1 = getRegNo();
+                int r = getRegNo();
                 fprintf(filePtr, "MOV R%d, BP\n", r1);
-                fprintf(filePtr, "ADD R%d, %d\n", r1, address);
+                fprintf(filePtr, "MOV R%d, %d\n", r, address);
+                fprintf(filePtr, "ADD R%d, R%d\n", r1, r);
+                freeReg();
             }
             if (t->left->expr != NULL){
                 int offset = opCodeGen(t->left->expr);
                 fprintf(filePtr, "ADD R%d, R%d\n", r1, offset);
                 freeReg();
             }
+            printf("Left and Right: %d %d\n", t->left->nodeType, t->right->nodeType);
             int r2 = opCodeGen(t->right);
+            printf("After opCodeGen\n");
             fprintf(filePtr, "MOV [R%d], R%d\n", r1, r2);
             freeReg();
             freeReg();
@@ -195,10 +204,13 @@ int stCodeGen(tnode *t){
                 fprintf(filePtr, "MOV R%d, %d\n", r1, address);    
             }
             else{
-                address = t->left->lEntry_>binding;
+                address = t->expr->lEntry->binding;
                 r1 = getRegNo();
+                int r = getRegNo();
                 fprintf(filePtr, "MOV R%d, BP\n", r1);
-                fprintf(filePtr, "ADD R%d, %d\n", r1, address);   
+                fprintf(filePtr, "MOV R%d, %d\n", r, address);
+                fprintf(filePtr, "ADD R%d, R%d\n", r1, r);   
+                freeReg();
             }
             if (t->expr->expr != NULL){
                 int offset = opCodeGen(t->expr->expr);
@@ -251,25 +263,35 @@ int stCodeGen(tnode *t){
 void returnCodeGen(tnode *node){
     int r1 = getRegNo();
     int r2 = opCodeGen(node);
+    int r3 = getRegNo();
     fprintf(filePtr, "MOV R%d, BP\n", r1);
-    fprintf(filePtr, "SUB R%d, 2\n", r1);
+    fprintf(filePtr, "MOV R%d, 2\n", r3);
+    fprintf(filePtr, "SUB R%d, R%d\n", r1, r3);
     fprintf(filePtr, "MOV [R%d], R%d\n", r1, r2);
+    freeReg();
     freeReg();
     freeReg();
     return;
 }
 
 void funcCodeGen(tnode *node){
-    lTable *table = node->left->link;
     while(node != NULL){
-        provideMemoryToLocal(node->left->link);
+        lTable *table = node->left->lEntry;
+        provideMemoryToLocal(node->left->lEntry);
         fprintf(filePtr, "//Code Gen for %s function\n", node->name);
+        printf("Printing for %s\n", node->name);
         fprintf(filePtr, "%s:\n", node->name);
         fprintf(filePtr, "PUSH BP\n");
         fprintf(filePtr, "MOV BP, SP\n");
         int count;
+        if (table == NULL){
+            fprintf(filePtr, "//Nothing inside of Local SymTable\n");
+        }
         while(table != NULL){
-            fprintf(filePtr, "PUSH %d\n", table->binding);
+            int r1 = getRegNo();
+            fprintf(filePtr, "MOV R%d, %d\n", r1, table->binding);
+            fprintf(filePtr, "PUSH R%d\n", r1);
+            freeReg();
             count = table->binding;
             table = table->next;
         }
@@ -278,9 +300,13 @@ void funcCodeGen(tnode *node){
             stCodeGen(temp);
             temp = temp->left;
         }
+        printf("Statement codeGen Done\n");
         returnCodeGen(node->left->right);
         while(count > 0){
-            fprintf(filePtr, "POP %d\n", count);
+            int r1 = getRegNo();
+            fprintf(filePtr, "MOV R%d, %d\n", r1, count);
+            fprintf(filePtr, "POP R%d\n", r1);
+            freeReg();
             count--;
         }
         fprintf(filePtr, "POP BP\n");
@@ -308,10 +334,7 @@ void codeGen(tnode *t){
     }
     fprintf(filePtr, "HALT\n");
     fprintf(filePtr, "\n");
-    while (t != NULL){
-        funcCodeGen(t);
-        t = t->right;
-    }
+    funcCodeGen(t);
     fclose(filePtr);
     return;
 }
