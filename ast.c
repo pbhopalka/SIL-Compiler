@@ -1,9 +1,9 @@
 #include "y.tab.h"
-int memory[100000];						//Used for memory allocation of variables
 extern int lineNo;
 
-struct tnode *makeFunctionNode(tnode *id, int type, tnode *argList, tnode *decl, tnode *body){
-	checkReturnType(type, body->right->dataType);
+struct tnode *makeFunctionNode(tnode *id, int type, tnode *argList, tnode *body){
+	if (strcmp("main", id->name))
+		idDeclarationCheck(id);
 	checkArgumentType(argList); //see if arguments does not contain arrays or functions
 	checkFunctionDecl(id->name, type, argList);
 	tnode *temp;
@@ -14,7 +14,22 @@ struct tnode *makeFunctionNode(tnode *id, int type, tnode *argList, tnode *decl,
 	temp->expr = argList;
 	temp->left = body;
 	temp->gEntry = gSearch(id->name);
-	temp->lEntry = decl->lEntry;
+	return temp;
+}
+
+struct tnode *makeFunctionCall(tnode *id, tnode *exprList){
+	tnode *temp;
+	temp = (tnode*)malloc(sizeof(tnode));
+	temp->name = id->name;
+	temp->expr = exprList;
+	temp->nodeType = CALL;
+	temp->gEntry = gSearch(id->name);
+	if (temp->gEntry == NULL){
+		printf("Line : %d :: Function %s has not been declared.\n", lineNo, id->name);
+		exit(0);
+	}
+	else
+		temp->dataType = temp->gEntry->type;
 	return temp;
 }
 
@@ -76,9 +91,17 @@ struct tnode *makeID(char *id){
 	temp->expr = NULL;
 	temp->left = NULL;
 	temp->right = NULL;
-	temp->gEntry = gSearch(id);
-	if (temp->gEntry != NULL){
-		temp->dataType = temp->gEntry->type;
+	temp->lEntry = lSearch(id);
+	if (temp->lEntry != NULL){
+		temp->dataType = temp->lEntry->type;
+		temp->passByRef = temp->lEntry->bindingType;
+		temp->gEntry = NULL;
+	}
+	else{
+		temp->gEntry = gSearch(id);
+		if (temp->gEntry != NULL){
+			temp->dataType = temp->gEntry->type;
+		}
 	}
 	return temp;
 }
@@ -142,7 +165,7 @@ struct tnode *makeIterativeNode(tnode *expr, tnode *slist){
 	temp->right = NULL;
 	return temp;
 }
-
+/*
 void evaluate(struct tnode *t){
 	if (t->nodeType == NUM){ 														//For numbers
 		return;
@@ -340,3 +363,4 @@ void evaluate(struct tnode *t){
 	}
 	return;
 }
+*/

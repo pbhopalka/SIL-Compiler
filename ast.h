@@ -1,6 +1,9 @@
 #define STMT 0
 #define FUNC 1
-#define VOID 0
+#define CALL 2
+#define VOID 3
+#define VAR 0
+#define ARR 2
 #define TRUE 1
 #define FALSE 0
 
@@ -8,12 +11,14 @@
 
 /* The node for AST will have these features and can simply be called as tnode */
 typedef struct tnode{
-	int dataType; //either an int or bool
+	int dataType; //either an int or bool; also denotes if an ID is passs by ref or val
 	int nodeType; //can be PLUS, SUB, IF, WHILE, STMT, etc.
 	int val; //if the node is integer node, to store the value
 	int boolVal; //if the node is boolean node, to store the value
 	char *name; //if the node is a variable, to store the variable name
+	int passByRef; //TRUE if pass by reference and FALSE if pass by value
 	struct tnode *expr; //pointer to another expression (used in IF, WHILE, STMT, READ, WRITE).. Also for function args
+						//.. Also for storing argument lists while calling function
 	struct tnode *left; //pointer to left node(used in IF, WHILE, boolOP, operator, ASSG, STMT)
 	struct tnode *right; //pointer to right node (used in IF, boolOP, operator, ASSG). Also used for return exp for Slist
 	struct gTable *gEntry; //for the location in the symbol table entry if node is a variable
@@ -22,7 +27,11 @@ typedef struct tnode{
 
 
 // Function node
-struct tnode *makeFunctionNode(tnode *id, int type, tnode *argList, tnode *decl, tnode *body);
+// For nodes like Main function
+struct tnode *makeFunctionNode(tnode *id, int type, tnode *argList, tnode *body);
+
+// For the nodes that will call the function nodes
+struct tnode *makeFunctionCall(tnode *id, tnode *exprList);
 
 // Creates a node for Statement with tnode->expr containing node and tnode->left containing next
 // Called from expl.y when a statement is completed
