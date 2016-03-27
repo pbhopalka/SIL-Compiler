@@ -1,9 +1,49 @@
 DECL
-    int b, a;
-    bool c, x;
+    integer factorial(integer n);
+    integer n;
+    integer swap(integer &x, &y);
 ENDDECL
-BEGIN
-    a = 6;
-    b = 4;
-    write(a+b);
-END
+
+integer swap(integer &x, &y) {
+    DECL
+        integer q;
+    ENDDECL
+    BEGIN
+        q = x;
+        x = y;
+        y = q;
+        return 1;
+    END
+}
+
+integer factorial (integer n) {
+    DECL
+        integer rvalue;
+    ENDDECL
+    BEGIN
+        n=1;
+        if (n==1) then
+            rvalue = 1;
+        else
+            rvalue = n * factorial (n-1);
+        endif;
+        return rvalue;
+    END
+}
+
+integer main(){
+    DECL
+        integer n,i, a ;
+    ENDDECL
+    BEGIN
+        read (n);
+        i = 1;
+        while ( i <= n) do
+            write ( factorial(i));
+            i = i + 1;
+        endwhile;
+        a = 3;
+        a = swap(i, n);
+        return 1;
+    END
+}
