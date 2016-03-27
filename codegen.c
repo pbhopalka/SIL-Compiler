@@ -40,9 +40,18 @@ int opCodeGen(tnode *t){
             break;
         }
         case ID:{
-            int address = t->gEntry->binding;
-            r1 = getRegNo();
-            fprintf(filePtr, "MOV R%d, %d\n", r1, address);
+            int address;
+            if (t->left->lEntry == NULL){
+                address = t->left->gEntry->binding;
+                r1 = getRegNo();
+                fprintf(filePtr, "MOV R%d, %d\n", r1, address);
+            }
+            else{
+                address = t->left->lEntry_>binding;
+                r1 = getRegNo();
+                fprintf(filePtr, "MOV R%d, BP\n", r1);
+                fprintf(filePtr, "ADD R%d, %d\n", r1, address);
+            }
             if (t->expr != NULL){
                 int offset = opCodeGen(t->expr);
                 fprintf(filePtr, "ADD R%d, R%d\n", r1, offset);
@@ -155,9 +164,18 @@ int stCodeGen(tnode *t){
             }
             break;
         case ASSG:{
-            int address = t->left->gEntry->binding;
-            r1 = getRegNo();
-            fprintf(filePtr, "MOV R%d, %d\n", r1, address);
+            int address;
+            if (t->left->lEntry == NULL){
+                address = t->left->gEntry->binding;
+                r1 = getRegNo();
+                fprintf(filePtr, "MOV R%d, %d\n", r1, address);
+            }
+            else{
+                address = t->left->lEntry_>binding;
+                r1 = getRegNo();
+                fprintf(filePtr, "MOV R%d, BP\n", r1);
+                fprintf(filePtr, "ADD R%d, %d\n", r1, address);
+            }
             if (t->left->expr != NULL){
                 int offset = opCodeGen(t->left->expr);
                 fprintf(filePtr, "ADD R%d, R%d\n", r1, offset);
@@ -170,9 +188,18 @@ int stCodeGen(tnode *t){
             break;
         }
         case READ:{
-            int address = t->expr->gEntry->binding;
-            r1 = getRegNo();
-            fprintf(filePtr, "MOV R%d, %d\n", r1, address);
+            int address;
+            if (t->expr->lEntry == NULL){
+                address = t->expr->gEntry->binding;
+                r1 = getRegNo();
+                fprintf(filePtr, "MOV R%d, %d\n", r1, address);    
+            }
+            else{
+                address = t->left->lEntry_>binding;
+                r1 = getRegNo();
+                fprintf(filePtr, "MOV R%d, BP\n", r1);
+                fprintf(filePtr, "ADD R%d, %d\n", r1, address);   
+            }
             if (t->expr->expr != NULL){
                 int offset = opCodeGen(t->expr->expr);
                 fprintf(filePtr, "ADD R%d, R%d\n", r1, offset);
@@ -221,19 +248,44 @@ int stCodeGen(tnode *t){
     return 0;
 }
 
+void returnCodeGen(tnode *node){
+    int r1 = getRegNo();
+    int r2 = opCodeGen(node);
+    fprintf(filePtr, "MOV R%d, BP\n", r1);
+    fprintf(filePtr, "SUB R%d, 2\n", r1);
+    fprintf(filePtr, "MOV [R%d], R%d\n", r1, r2);
+    freeReg();
+    freeReg();
+    return;
+}
+
 void funcCodeGen(tnode *node){
     lTable *table = node->left->link;
     while(node != NULL){
         provideMemoryToLocal(node->left->link);
         fprintf(filePtr, "//Code Gen for %s function\n", node->name);
         fprintf(filePtr, "%s:\n", node->name);
+        fprintf(filePtr, "PUSH BP\n");
+        fprintf(filePtr, "MOV BP, SP\n");
+        int count;
+        while(table != NULL){
+            fprintf(filePtr, "PUSH %d\n", table->binding);
+            count = table->binding;
+            table = table->next;
+        }
         tnode *temp = node->left;
         while (temp != NULL){
             stCodeGen(temp);
             temp = temp->left;
         }
+        returnCodeGen(node->left->right);
+        while(count > 0){
+            fprintf(filePtr, "POP %d\n", count);
+            count--;
+        }
+        fprintf(filePtr, "POP BP\n");
+        fprintf(filePtr, "RET\n");
         fprintf(filePtr, "\n");
-        cleanLocalMemory(node->left->link);
         node = node->right;
     }
     return;
