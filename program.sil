@@ -1,18 +1,27 @@
 DECL
-  int a[10], b, i;
-  bool c;
+  integer a, b, i;
+  integer add(integer a, c);
 ENDDECL
-BEGIN
-  c = TRUE;
-  i = 0;
-  b = 0;
-  while (c) do
-    read(a[i]);
-    b = b + a[i];
-    i = i + 1;
-    if (i == 5) then
-      c = FALSE;
-    endif;
-  endwhile;
-  write(b);
-END
+
+integer add(integer a, c){
+  DECL
+    integer b;
+  ENDDECL
+  BEGIN
+    b = a + c;
+    return b;
+  END
+}
+
+integer main(){
+  DECL
+    int c;
+  ENDDECL
+  BEGIN
+    a = 3;
+    read(c);
+    b = add(a, c);
+    write(b);
+    return 0;
+  END
+}
