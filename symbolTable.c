@@ -19,9 +19,10 @@ void provideMemoryToGlobal(){
 void provideMemoryToLocal(lTable *table){
 	lTable *temp;
 	temp = table;
+  int mem = 1;
 	while (temp != NULL){
-		temp->binding = memory;
-		memory += 1;
+		temp->binding = mem;
+		mem += 1;
 		temp = temp->next;
 	}
 }
