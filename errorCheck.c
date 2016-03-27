@@ -1,6 +1,8 @@
 #include "y.tab.h"
 extern int lineNo;
 
+/*What happens if it is declared as not pass by reference but defined as passByRef = True*/
+
 int checkArrayDeclaration(tnode *node){
     if (node->gEntry->size == 0){
         if (node->expr != NULL){
@@ -24,12 +26,14 @@ int checkArrayDeclaration(tnode *node){
 
 int idDeclarationCheck(tnode *r){
     if (r->nodeType == ID){
-		if (r->gEntry == NULL){
-			printf("Line: %d :: Variable %s not declared\n", lineNo, r->name);
-			exit(1);
-		}
-        else
-            checkArrayDeclaration(r);
+        if (r->lEntry == NULL){
+            if (r->gEntry == NULL){
+    			printf("Line: %d :: '%s' not declared\n", lineNo, r->name);
+    			exit(1);
+    		}
+            else
+                checkArrayDeclaration(r);
+        }
 	}
     return 0;
 }
@@ -70,15 +74,12 @@ int checkReturnType(int type1, int type2){
     return 0;
 }
 
-int checkArgumentType(tnode *node){
+int checkArgumentType(tnode *node){ //check if arguments passed to the functions (or in local decl) are not arrays or functions
     int flag = 0;
-    printf("Checking Args\n");
     tnode *temp1 = node;
     while (temp1 != NULL){
-        printf("Node: %s\n", temp1->name);
         tnode *temp = temp1;
         while(temp != NULL){
-            printf("temp: %s\n", node->name);
             if (temp->nodeType == STMT && temp->val == 0)
                 flag = 0;
             else
@@ -97,7 +98,7 @@ int checkArgumentType(tnode *node){
 int searchArgList(argList *arg, tnode *argument){
     argList *arglist = makeArgList(argument);
     while(arglist != NULL){
-        if (strcmp(arglist->name, arg->name) != 0 || arg->type != arglist->type){
+        if (strcmp(arglist->name, arg->name) != 0 || arg->type != arglist->type || arg->passByRef != arglist->passByRef){
             printf("Line : %d :: Arguments in declaration do not match in the definitions\n", lineNo);
             exit(0);
         }
@@ -133,5 +134,27 @@ int checkFunctionDecl(char *name, int type, tnode *argument){
         exit(0);
     }
     searchArgList(temp->arg, argument); //check if arguments have been declared properly
+    return 0;
+}
+
+int checkPassedArgument(tnode *id, tnode *exprList){
+    gTable *gTemp = gSearch(id->name);
+    if (gTemp == NULL){
+        printf("Line : %d :: The function %s has not been declared.\n", lineNo, id->name);
+        exit(0);
+    }
+    argList *arg = gTemp->arg;
+    while(exprList != NULL && arg != NULL){
+        if (exprList->dataType != arg->type){
+            printf("Line : %d :: Argument type mismatch in %s function.\n", lineNo, id->name);
+            exit(0);
+        }
+        exprList = exprList->expr;
+        arg = arg->next;
+    }
+    if (arg != NULL || exprList != NULL){
+        printf("Line : %d :: Number of arguments is not same as declared in '%s' function\n", lineNo, id->name);
+        exit(0);
+    }
     return 0;
 }
