@@ -1,5 +1,5 @@
 DECL
-  integer a[10], b, i;
+  integer a[10], b, i, p;
   integer add1(integer a, c);
 ENDDECL
 
@@ -9,7 +9,7 @@ integer add1(integer a, c){
   ENDDECL
   BEGIN
     b = a + c;
-    a = 10;
+    p = 10;
     return b;
   END
 }
@@ -24,10 +24,13 @@ integer main(){
         read(a[i]);
         i = i + 1;
     endwhile;
+    read(p);
+    write(p);
     read(b);
     c = 9;
     b = add1(a[b], c);
     write(b);
+    write(p);
     return 0;
   END
 }

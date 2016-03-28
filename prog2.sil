@@ -35,12 +35,12 @@ integer main(){
         integer i, a ;
     ENDDECL
     BEGIN
-        read (n);
-        i = 1;
-        while(i <= n) do
-            write(factorial(i));
-            i = i + 1;
-        endwhile;
+        read (i);
+        read(a);
+        n = swap(a, i);
+        write(factorial(n));
+        write(i);
+        write(a);
         return 1;
     END
 }
