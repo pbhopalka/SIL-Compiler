@@ -59,6 +59,9 @@ int opCodeGen(tnode *t){
                 fprintf(filePtr, "MOV R%d, BP\n", r1);
                 fprintf(filePtr, "MOV R%d, %d\n", r, address);
                 fprintf(filePtr, "ADD R%d, R%d\n", r1, r);
+                if (t->lEntry->bindingType == 1){
+                    fprintf(filePtr, "MOV R%d, [R%d]\n", r1, r1);
+                }
                 freeReg();
             }
             fprintf(filePtr, "MOV R%d, [R%d]\n", r1, r1);
@@ -81,23 +84,26 @@ int opCodeGen(tnode *t){
                 }
                 else{
                     int address;
-                    if (t->lEntry == NULL){
-                        address = t->gEntry->binding;
+                    if (temp->lEntry == NULL){
+                        address = temp->gEntry->binding;
                         r1 = getRegNo();
                         fprintf(filePtr, "MOV R%d, %d\n", r1, address);
-                        if (t->left != NULL){//For function arguments, it's going here. Only meant for arrays
-                            int offset = opCodeGen(t->expr);
+                        if (temp->left != NULL){//For function arguments, it's going here. Only meant for arrays
+                            int offset = opCodeGen(temp->left);
                             fprintf(filePtr, "ADD R%d, R%d\n", r1, offset);
                             freeReg();
                         }
                     }
                     else{
-                        address = t->lEntry->binding;
+                        address = temp->lEntry->binding;
                         r1 = getRegNo();
                         int r = getRegNo();
                         fprintf(filePtr, "MOV R%d, BP\n", r1);
                         fprintf(filePtr, "MOV R%d, %d\n", r, address);
                         fprintf(filePtr, "ADD R%d, R%d\n", r1, r);
+                        if (temp->lEntry->bindingType == 1){
+                            fprintf(filePtr, "MOV R%d, [R%d]\n", r1, r1);
+                        }
                         freeReg();
                     }
                 }
@@ -234,7 +240,7 @@ int stCodeGen(tnode *t){
                 r1 = getRegNo();
                 fprintf(filePtr, "MOV R%d, %d\n", r1, address);
                 if (t->left->left != NULL){
-                    int offset = opCodeGen(t->left->expr);
+                    int offset = opCodeGen(t->left->left);
                     fprintf(filePtr, "ADD R%d, R%d\n", r1, offset);
                     freeReg();
                 }
@@ -246,6 +252,9 @@ int stCodeGen(tnode *t){
                 fprintf(filePtr, "MOV R%d, BP\n", r1);
                 fprintf(filePtr, "MOV R%d, %d\n", r, address);
                 fprintf(filePtr, "ADD R%d, R%d\n", r1, r);
+                if (t->left->lEntry->bindingType == 1){
+                    fprintf(filePtr, "MOV R%d, [R%d]\n", r1, r1);
+                }
                 freeReg();
             }
             int r2 = opCodeGen(t->right);
@@ -275,6 +284,9 @@ int stCodeGen(tnode *t){
                 fprintf(filePtr, "MOV R%d, BP\n", r1);
                 fprintf(filePtr, "MOV R%d, %d\n", r, address);
                 fprintf(filePtr, "ADD R%d, R%d\n", r1, r);
+                if (t->expr->lEntry->bindingType == 1){
+                    fprintf(filePtr, "MOV R%d, [R%d]\n", r1, r1);
+                }
                 freeReg();
             }
             printf("Register address in READ\n");
