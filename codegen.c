@@ -23,6 +23,24 @@ int generateLabel(){
     return label;
 }
 
+tnode *reverseList(tnode *node){
+    tnode *temp = NULL, *temp2 = node;
+    tnode *temp3;
+    while(temp2 != NULL){
+        temp3 = temp2->expr;
+        temp2->expr = temp;
+        temp = temp2;
+        temp2 = temp3;
+    }
+    temp2 = temp;
+    while(temp2 != NULL){
+        fprintf(filePtr, "//%s ", temp2->name);
+        temp2 = temp2->expr;
+    }
+    fprintf(filePtr, "\n");
+    return temp;
+}
+
 int opCodeGen(tnode *t){
     //printf("Entering for %d\n", t->nodeType);
     int r1, r2;
@@ -46,6 +64,11 @@ int opCodeGen(tnode *t){
                 address = t->gEntry->binding;
                 r1 = getRegNo();
                 fprintf(filePtr, "MOV R%d, %d\n", r1, address);
+                if (t->left != NULL){//For function arguments, it's going here. Only meant for arrays
+                    int offset = opCodeGen(t->expr);
+                    fprintf(filePtr, "ADD R%d, R%d\n", r1, offset);
+                    freeReg();
+                }
             }
             else{
                 address = t->lEntry->binding;
@@ -56,16 +79,45 @@ int opCodeGen(tnode *t){
                 fprintf(filePtr, "ADD R%d, R%d\n", r1, r);
                 freeReg();
             }
-            if (t->expr != NULL){
-                int offset = opCodeGen(t->expr);
-                fprintf(filePtr, "ADD R%d, R%d\n", r1, offset);
-                freeReg();
-            }
             fprintf(filePtr, "MOV R%d, [R%d]\n", r1, r1);
             break;
         }
         case CALL:{
+            int i = 0;
+            while(i < regNo){
+                fprintf(filePtr, "PUSH R%d\n", i);
+                i++;
+            }
+            //Pushing the arguments
+            tnode *temp = t->expr;
+            int count = 0;
+            fprintf(filePtr, "//Pushing the arguments\n");
+            while (temp != NULL){
+                r1 = opCodeGen(temp);
+                fprintf(filePtr, "PUSH R%d\n", r1);
+                freeReg();
+                temp = temp->expr;
+                count++;
+            }
+            fprintf(filePtr, "//Pushing arguments done\n");
+            r1 = getRegNo(); //For return value
+            fprintf(filePtr, "PUSH R%d\n", r1);
             fprintf(filePtr, "CALL %s\n", t->name);
+            fprintf(filePtr, "POP R%d\n", r1); //Need to save this value somewhere
+            //Popping off the arguments
+            temp = t->expr;
+            fprintf(filePtr, "//Popping off arguments\n");
+            r2 = getRegNo();
+            while(temp != NULL){
+                fprintf(filePtr, "POP R%d\n", r2);
+                temp = temp->expr;
+            }
+            freeReg();
+            fprintf(filePtr, "//Popping arguments done\n");
+            while (i > 0){
+                i--;
+                fprintf(filePtr, "POP R%d\n", i);
+            }
             break;
         }
         case PLUS:
@@ -173,6 +225,11 @@ int stCodeGen(tnode *t){
                 address = t->left->gEntry->binding;
                 r1 = getRegNo();
                 fprintf(filePtr, "MOV R%d, %d\n", r1, address);
+                if (t->left->left != NULL){
+                    int offset = opCodeGen(t->left->expr);
+                    fprintf(filePtr, "ADD R%d, R%d\n", r1, offset);
+                    freeReg();
+                }
             }
             else{
                 address = t->left->lEntry->binding;
@@ -183,12 +240,6 @@ int stCodeGen(tnode *t){
                 fprintf(filePtr, "ADD R%d, R%d\n", r1, r);
                 freeReg();
             }
-            if (t->left->expr != NULL){
-                int offset = opCodeGen(t->left->expr);
-                fprintf(filePtr, "ADD R%d, R%d\n", r1, offset);
-                freeReg();
-            }
-            printf("Left and Right: %d %d\n", t->left->nodeType, t->right->nodeType);
             int r2 = opCodeGen(t->right);
             printf("After opCodeGen\n");
             fprintf(filePtr, "MOV [R%d], R%d\n", r1, r2);
@@ -201,7 +252,12 @@ int stCodeGen(tnode *t){
             if (t->expr->lEntry == NULL){
                 address = t->expr->gEntry->binding;
                 r1 = getRegNo();
-                fprintf(filePtr, "MOV R%d, %d\n", r1, address);    
+                fprintf(filePtr, "MOV R%d, %d\n", r1, address);
+                if (t->expr->left != NULL){
+                    int offset = opCodeGen(t->expr->expr);
+                    fprintf(filePtr, "ADD R%d, R%d\n", r1, offset);
+                    freeReg();
+                }
             }
             else{
                 address = t->expr->lEntry->binding;
@@ -209,12 +265,7 @@ int stCodeGen(tnode *t){
                 int r = getRegNo();
                 fprintf(filePtr, "MOV R%d, BP\n", r1);
                 fprintf(filePtr, "MOV R%d, %d\n", r, address);
-                fprintf(filePtr, "ADD R%d, R%d\n", r1, r);   
-                freeReg();
-            }
-            if (t->expr->expr != NULL){
-                int offset = opCodeGen(t->expr->expr);
-                fprintf(filePtr, "ADD R%d, R%d\n", r1, offset);
+                fprintf(filePtr, "ADD R%d, R%d\n", r1, r);
                 freeReg();
             }
             int r2 = getRegNo();
@@ -225,6 +276,7 @@ int stCodeGen(tnode *t){
             break;
         }
         case WRITE:
+            fprintf(filePtr, "//Code for WRITE\n");
             r1 = opCodeGen(t->expr);
             fprintf(filePtr, "OUT R%d\n", r1);
             freeReg();
@@ -261,6 +313,8 @@ int stCodeGen(tnode *t){
 }
 
 void returnCodeGen(tnode *node){
+    printf("Going for return\n");
+    fprintf(filePtr, "//Printing for return\n");
     int r1 = getRegNo();
     int r2 = opCodeGen(node);
     int r3 = getRegNo();
@@ -274,16 +328,28 @@ void returnCodeGen(tnode *node){
     return;
 }
 
+
+lTable *reverseTable(lTable *table){
+    lTable *temp = NULL, *temp2 = table;
+    lTable *temp3;
+    while(temp2 != NULL){
+        temp3 = temp2->next;
+        temp2->next = temp;
+        temp = temp2;
+        temp2 = temp3;
+    }
+    return temp;
+}
+
 void funcCodeGen(tnode *node){
     while(node != NULL){
         lTable *table = node->left->lEntry;
-        provideMemoryToLocal(node->left->lEntry);
+        provideMemoryToLocal(node->name, node->left->lEntry);
         fprintf(filePtr, "//Code Gen for %s function\n", node->name);
         printf("Printing for %s\n", node->name);
         fprintf(filePtr, "%s:\n", node->name);
         fprintf(filePtr, "PUSH BP\n");
         fprintf(filePtr, "MOV BP, SP\n");
-        int count;
         if (table == NULL){
             fprintf(filePtr, "//Nothing inside of Local SymTable\n");
         }
@@ -292,22 +358,26 @@ void funcCodeGen(tnode *node){
             fprintf(filePtr, "MOV R%d, %d\n", r1, table->binding);
             fprintf(filePtr, "PUSH R%d\n", r1);
             freeReg();
-            count = table->binding;
             table = table->next;
         }
-        tnode *temp = node->left;
-        while (temp != NULL){
-            stCodeGen(temp);
-            temp = temp->left;
-        }
-        printf("Statement codeGen Done\n");
+        stCodeGen(node->left);
         returnCodeGen(node->left->right);
-        while(count > 0){
+        printf("Return code completed\n");
+        table = reverseTable(node->left->lEntry);
+        printf("Reversing table done\n");
+        while(table != NULL){
             int r1 = getRegNo();
-            fprintf(filePtr, "MOV R%d, %d\n", r1, count);
             fprintf(filePtr, "POP R%d\n", r1);
+            int r2 = getRegNo();
+            int r = getRegNo();
+            fprintf(filePtr, "MOV R%d, BP\n", r2);
+            fprintf(filePtr, "MOV R%d, %d\n", r, table->binding);
+            fprintf(filePtr, "ADD R%d, R%d\n", r2, r);
+            fprintf(filePtr, "MOV [R%d], R%d\n", r2, r1);
             freeReg();
-            count--;
+            freeReg();
+            freeReg();
+            table = table->next;
         }
         fprintf(filePtr, "POP BP\n");
         fprintf(filePtr, "RET\n");
