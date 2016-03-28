@@ -1,0 +1,51 @@
+decl
+	integer i, a[10], ret;
+	integer bSort(integer n);
+enddecl
+
+integer bSort(integer n){
+	decl
+		integer i, j, temp;
+	enddecl
+	
+	begin
+		i=0;
+		while(i<n) do
+			j=1;
+			while(j<n) do
+				if(a[j]<a[j-1]) then
+					temp = a[j];
+					a[j] = a[j-1];
+					a[j-1] = temp;
+				endif;
+				j=j+1;
+			endwhile;
+			i=i+1;
+		endwhile;
+
+		return 123;
+	end
+}
+
+integer main(){
+begin
+	i = 0;
+	while(i<10) do
+		read(a[i]);
+		i=i+1;
+	endwhile;
+	
+	read(i);
+	
+	ret = bSort(i);
+	
+	i = 0;
+	
+	while(i<10) do
+		write(a[i]);
+		i=i+1;
+	endwhile;
+	
+	return 0;
+end
+}

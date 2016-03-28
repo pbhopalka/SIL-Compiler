@@ -1,0 +1,17 @@
+typedef name1{
+	integer b;
+	integer a;
+}
+decl
+	integer i,main();
+	name1 A;
+enddecl
+integer main(){
+begin
+	read(A.b);
+	read(A.a);
+	write(A.b);
+	write(A.a);
+	return 0;
+end
+}

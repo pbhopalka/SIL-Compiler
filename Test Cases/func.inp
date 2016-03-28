@@ -1,0 +1,43 @@
+decl 
+	integer b,c,d;
+	integer a(integer &b,&c);
+	integer b1(integer b,c);
+enddecl
+
+integer a(integer &b,&c){
+	begin
+		b=b+1;
+		c=c+1;
+		return 1;
+	end
+}
+
+integer b1(integer b,c){
+	begin
+		
+		write(b);
+		write(c);
+		
+		b=7;
+		c=8;
+		return 1;
+	end
+}
+
+integer main(){
+	begin
+		b=5;
+		c=6;
+		d=a(b,c);
+		write(b);
+		write(c);
+		d=b1(b,c);
+		write(b);
+		write(c);
+		d=a(b,c);
+		write(b);
+		write(c);
+		
+		return 1;
+	end
+}	

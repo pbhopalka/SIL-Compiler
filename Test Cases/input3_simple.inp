@@ -1,0 +1,27 @@
+decl
+	integer a(integer &x), d, result;
+	integer b(integer &y);
+enddecl
+
+integer main(){
+begin
+	read(d);
+    result = a(d);
+	return 0;
+end
+}
+
+integer a(integer &x){
+begin
+	result = b(x);
+	return 0;
+end
+}
+
+integer b(integer &y){
+begin
+	y = 12;
+	write(d);
+	return 0;
+end
+}

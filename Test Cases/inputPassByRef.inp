@@ -1,0 +1,21 @@
+decl
+	integer a(integer &x), var1[10], result;
+enddecl
+integer main(){
+begin
+	read(var1[5]);
+    write(var1[5]);
+    result = a(var1[5]);
+    write(var1[5]);
+	return 0;
+end
+}
+integer a(integer &x){
+begin
+    write(x);
+    x = 314;
+    write(x);
+	write(var1[5]);
+	return x;
+end
+}

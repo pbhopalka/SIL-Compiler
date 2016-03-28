@@ -1,0 +1,38 @@
+decl
+	integer a(integer &x), var1[10], result;
+	integer b(integer &y);
+enddecl
+integer main(){
+begin
+	read(var1[5]);
+    write(var1[5]);
+    result = a(var1[5]);
+    write(var1[5]);
+	return 0;
+end
+}
+
+integer a(integer &x){
+decl
+	integer ret;
+enddecl
+begin
+    write(x);
+    x = 314;
+    write(x);
+	write(var1[5]);
+	ret = b(x);
+	write(x);
+	write(var1[5]);
+	return x;
+end
+}
+
+integer b(integer &y){
+begin
+	y = 12;
+	write(y);
+	write(var1[5]);
+	return 0;
+end
+}

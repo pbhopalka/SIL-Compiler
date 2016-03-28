@@ -1,0 +1,10 @@
+decl
+	integer a,b;
+enddecl
+integer main(){
+	begin
+		read(a);
+		write(a);
+		return 0;
+	end
+}

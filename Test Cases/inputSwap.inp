@@ -1,0 +1,29 @@
+decl
+	integer swap(integer &x, &y), a, b, result;
+	boolean bool;
+enddecl
+integer main(){
+begin
+	read(a);
+	read(b);
+    write(a);
+    write(b);
+    result = swap(a, b);
+    write(a);
+    write(b);
+	return 0;
+end
+}
+integer swap(integer &x, &y){
+decl
+	integer temp;
+enddecl
+begin
+	temp = x;
+	x = y;
+	y = temp;
+	write(x);
+    write(y);
+	return 0;
+end
+}
