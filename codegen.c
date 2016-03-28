@@ -23,24 +23,6 @@ int generateLabel(){
     return label;
 }
 
-tnode *reverseList(tnode *node){
-    tnode *temp = NULL, *temp2 = node;
-    tnode *temp3;
-    while(temp2 != NULL){
-        temp3 = temp2->expr;
-        temp2->expr = temp;
-        temp = temp2;
-        temp2 = temp3;
-    }
-    temp2 = temp;
-    while(temp2 != NULL){
-        fprintf(filePtr, "//%s ", temp2->name);
-        temp2 = temp2->expr;
-    }
-    fprintf(filePtr, "\n");
-    return temp;
-}
-
 int opCodeGen(tnode *t){
     //printf("Entering for %d\n", t->nodeType);
     int r1, r2;
@@ -65,7 +47,7 @@ int opCodeGen(tnode *t){
                 r1 = getRegNo();
                 fprintf(filePtr, "MOV R%d, %d\n", r1, address);
                 if (t->left != NULL){//For function arguments, it's going here. Only meant for arrays
-                    int offset = opCodeGen(t->expr);
+                    int offset = opCodeGen(t->left);
                     fprintf(filePtr, "ADD R%d, R%d\n", r1, offset);
                     freeReg();
                 }
@@ -92,11 +74,37 @@ int opCodeGen(tnode *t){
             tnode *temp = t->expr;
             int count = 0;
             fprintf(filePtr, "//Pushing the arguments\n");
+            argList *arg = t->gEntry->arg;
             while (temp != NULL){
-                r1 = opCodeGen(temp);
+                if (arg->passByRef == 0){
+                    r1 = opCodeGen(temp);
+                }
+                else{
+                    int address;
+                    if (t->lEntry == NULL){
+                        address = t->gEntry->binding;
+                        r1 = getRegNo();
+                        fprintf(filePtr, "MOV R%d, %d\n", r1, address);
+                        if (t->left != NULL){//For function arguments, it's going here. Only meant for arrays
+                            int offset = opCodeGen(t->expr);
+                            fprintf(filePtr, "ADD R%d, R%d\n", r1, offset);
+                            freeReg();
+                        }
+                    }
+                    else{
+                        address = t->lEntry->binding;
+                        r1 = getRegNo();
+                        int r = getRegNo();
+                        fprintf(filePtr, "MOV R%d, BP\n", r1);
+                        fprintf(filePtr, "MOV R%d, %d\n", r, address);
+                        fprintf(filePtr, "ADD R%d, R%d\n", r1, r);
+                        freeReg();
+                    }
+                }
                 fprintf(filePtr, "PUSH R%d\n", r1);
                 freeReg();
                 temp = temp->expr;
+                arg = arg->next;
                 count++;
             }
             fprintf(filePtr, "//Pushing arguments done\n");
@@ -250,11 +258,12 @@ int stCodeGen(tnode *t){
         case READ:{
             int address;
             if (t->expr->lEntry == NULL){
+                printf("Enter global\n");
                 address = t->expr->gEntry->binding;
                 r1 = getRegNo();
                 fprintf(filePtr, "MOV R%d, %d\n", r1, address);
                 if (t->expr->left != NULL){
-                    int offset = opCodeGen(t->expr->expr);
+                    int offset = opCodeGen(t->expr->left);
                     fprintf(filePtr, "ADD R%d, R%d\n", r1, offset);
                     freeReg();
                 }
@@ -268,6 +277,7 @@ int stCodeGen(tnode *t){
                 fprintf(filePtr, "ADD R%d, R%d\n", r1, r);
                 freeReg();
             }
+            printf("Register address in READ\n");
             int r2 = getRegNo();
             fprintf(filePtr, "IN R%d\n", r2);
             fprintf(filePtr, "MOV [R%d], R%d\n", r1, r2);
@@ -277,7 +287,9 @@ int stCodeGen(tnode *t){
         }
         case WRITE:
             fprintf(filePtr, "//Code for WRITE\n");
+            printf("Entered Write\n");
             r1 = opCodeGen(t->expr);
+            printf("Finished opcode in WRITE\n");
             fprintf(filePtr, "OUT R%d\n", r1);
             freeReg();
             break;
