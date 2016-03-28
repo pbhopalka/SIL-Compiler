@@ -24,13 +24,14 @@
 %token READ WRITE DECL ENDDECL
 %token integer boolean RETURN
 %token IF THEN ELSE ENDIF WHILE DO ENDWHILE BREAK
-%token PLUS SUB MUL DIV MOD ASSG
+%token PLUS SUB ASSG
+%token MUL DIV MOD
 %token LT GT LE GE EQ NE
 %token AND OR NOT
 %left PLUS SUB
 %left MUL DIV
 %left AND OR NOT
-%nonassoc LT GT LE GE EQ NE
+%nonassoc LT GT LE GE EQ NE MOD
 
 %%
 
@@ -113,6 +114,7 @@ body: BEGIN1 Slist ret END 	{$2->right = $3; $$ = $2;}
 	;
 
 ret: RETURN expr ';' 	{$$ = $2;}
+	;
 
 Slist: Stmt Slist       {$$ = makeStatement($1, $2);}
 	 |					{$$ = NULL;}
@@ -130,6 +132,7 @@ expr: expr PLUS expr 					{$$ = makeOperatorNode(PLUS, $1, $3);}
 	| expr SUB expr 					{$$ = makeOperatorNode(SUB, $1, $3);}
 	| expr MUL expr 					{$$ = makeOperatorNode(MUL, $1, $3);}
 	| expr DIV expr 					{$$ = makeOperatorNode(DIV, $1, $3);}
+	| expr MOD expr						{$$ = makeOperatorNode(MOD, $1, $3);}
 	| '(' expr ')' 						{$$ = $2;}
 	| SUB expr     						{$$ = makeOperatorNode(SUB, makeLeaf(0, integer), $2);}
 	| expr LT expr						{$$ = makeOperatorNode(LT, $1, $3);}

@@ -20,6 +20,7 @@ digit [0-9]+
 "-" 		{return SUB;}
 "*" 		{return MUL;}
 "/" 		{return DIV;}
+[%]			{return MOD;}
 "=" 		{return ASSG;}
 "<"			{return LT;}
 ">"			{return GT;}
@@ -29,10 +30,10 @@ digit [0-9]+
 "!="		{return NE;}
 "read"  	{return READ;}
 "write" 	{return WRITE;}
-"BEGIN" 	{return BEGIN1;}
-"END" 		{return END;}
-"DECL"		{return DECL;}
-"ENDDECL" 	{return ENDDECL;}
+"begin" 	{return BEGIN1;}
+"end" 		{return END;}
+"decl"		{return DECL;}
+"enddecl" 	{return ENDDECL;}
 "integer"	{return integer;}
 "boolean"	{return boolean;}
 "if"		{return IF;}
