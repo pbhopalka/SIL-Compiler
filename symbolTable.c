@@ -81,7 +81,7 @@ void printLocalSymTable(char *name){
     lTable *temp = lStart;
     printf("Local Symbol table for %s function\n", name);
     while (temp != NULL){
-        printf("%s %d\n", temp->name, temp->type);
+        printf("%s %d %d\n", temp->name, temp->type, temp->bindingType);
         temp = temp->next;
     }
     printf("\n");
