@@ -146,7 +146,7 @@ expr: expr PLUS expr 					{$$ = makeOperatorNode(PLUS, $1, $3);}
 	;
 
 loc: ID								{$1->expr = NULL;idDeclarationCheck($1);$$ = $1;}
-	| ID '[' expr ']'				{$1->lEntry = NULL;$1->expr = $3;idDeclarationCheck($1);$$ = $1;}
+	| ID '[' expr ']'				{$1->lEntry = NULL;$1->left = $3;idDeclarationCheck($1);$$ = $1;}
 	| ID '(' exprList ')'			{idDeclarationCheck($1);checkPassedArgument($1, $3);$$ = makeFunctionCall($1, $3);}
 	;
 

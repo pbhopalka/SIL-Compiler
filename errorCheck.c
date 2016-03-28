@@ -5,18 +5,18 @@ extern int lineNo;
 
 int checkArrayDeclaration(tnode *node){
     if (node->gEntry->size == 0){
-        if (node->expr != NULL){
+        if (node->left != NULL){
             printf("Line: %d :: Array has not been declared\n", lineNo);
             exit(0);
         }
     }
     else{
-        if (node->expr == NULL){
+        if (node->left == NULL){
             printf("Line: %d :: Array has been declared but a variable has been used\n", lineNo);
             exit(0);
         }
         else{
-            if (node->expr->dataType != integer){
+            if (node->left->dataType != integer){
                 printf("Line: %d :: Cannot be boolean index inside an array\n", lineNo);
                 exit(0);
             }
