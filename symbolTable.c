@@ -16,15 +16,46 @@ void provideMemoryToGlobal(){
 	}
 }
 
-void provideMemoryToLocal(lTable *table){
+int searchArg(argList *arg, char *name){
+	while(arg != NULL){
+		if (!strcmp(arg->name, name))
+			return 1;
+		arg = arg->next;
+	}
+	return 0;
+}
+
+void provideMemoryToLocal(char *name, lTable *table){
+	printf("Providing memory to %s\n", name);
+	if (!strcmp(name, "main")){
+		lTable *temp;
+		temp = table;
+	  	int mem = 1;
+		while(temp != NULL){
+			temp->binding = mem;
+			mem++;
+			temp = temp->next;
+		}
+		return;
+	}
+	gTable *global = gSearch(name);
+	argList *arg = global->arg;
 	lTable *temp;
 	temp = table;
-  int mem = 1;
+  	int mem = 1;
+	int mem2 = -3;
 	while (temp != NULL){
-		temp->binding = mem;
-		mem += 1;
+		if (searchArg(arg, temp->name)){
+			temp->binding = mem2;
+			mem2--;
+		}
+		else{
+			temp->binding = mem;
+			mem++;
+		}
 		temp = temp->next;
 	}
+	printf("Exiting memory\n");
 }
 
 void cleanLocalMemory(lTable *table){

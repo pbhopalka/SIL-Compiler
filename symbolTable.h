@@ -30,7 +30,7 @@ typedef struct lTable{
 
 void provideMemoryToGlobal(); //Providing binding location during runtime
 
-void provideMemoryToLocal(lTable *table);
+void provideMemoryToLocal(char *name, lTable *table);
 
 void cleanLocalMemory(lTable *table);
 
