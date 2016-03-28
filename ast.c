@@ -22,6 +22,8 @@ struct tnode *makeFunctionCall(tnode *id, tnode *exprList){
 	temp = (tnode*)malloc(sizeof(tnode));
 	temp->name = id->name;
 	temp->expr = exprList;
+	temp->left = NULL;
+	temp->right = NULL;
 	temp->nodeType = CALL;
 	temp->gEntry = gSearch(id->name);
 	if (temp->gEntry == NULL){
