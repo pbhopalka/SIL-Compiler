@@ -113,7 +113,14 @@ struct argList *makeArgList(tnode *node){
         }
         node = node->right;
     }
-    return start;
+	argList *t = NULL, *t2 = start, *t3; //Reversing this list
+    while(t2 != NULL){
+        t3 = t2->next;
+        t2->next = t;
+        t = t2;
+        t2 = t3;
+    }
+    return t;
 }
 
 void groupGInstall(tnode *node, int type){
