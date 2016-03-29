@@ -20,9 +20,10 @@ struct tnode *makeFunctionNode(tnode *id, int type, tnode *argList, tnode *body)
 struct tnode *makeFunctionCall(tnode *id, tnode *exprList){
 	tnode *temp;
 	temp = (tnode*)malloc(sizeof(tnode));
-	temp->name = id->name;
-	temp->expr = exprList;
-	temp->left = NULL;
+	id->expr = exprList;
+	temp->name = "CALL";
+	temp->expr = NULL;
+	temp->left = id;
 	temp->right = NULL;
 	temp->nodeType = CALL;
 	temp->gEntry = gSearch(id->name);
