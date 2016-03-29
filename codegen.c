@@ -68,6 +68,8 @@ int opCodeGen(tnode *t){
             break;
         }
         case CALL:{
+            t = t->left;
+            fprintf(filePtr, "//Called %s\n", t->name);
             int i = 0;
             while(i < regNo){
                 fprintf(filePtr, "PUSH R%d\n", i);
@@ -80,9 +82,11 @@ int opCodeGen(tnode *t){
             argList *arg = t->gEntry->arg;
             while (temp != NULL){
                 if (arg->passByRef == 0){
+                    fprintf(filePtr, "//For arg %s\n", temp->name);
                     r1 = opCodeGen(temp);
                 }
                 else{
+                    fprintf(filePtr, "//For args %s\n", temp->name);
                     int address;
                     if (temp->lEntry == NULL){
                         address = temp->gEntry->binding;
@@ -132,6 +136,7 @@ int opCodeGen(tnode *t){
                 i--;
                 fprintf(filePtr, "POP R%d\n", i);
             }
+            fprintf(filePtr, "//Calling done\n");
             break;
         }
         case PLUS:
@@ -352,19 +357,6 @@ void returnCodeGen(tnode *node){
     return;
 }
 
-
-lTable *reverseTable(lTable *table){
-    lTable *temp = NULL, *temp2 = table;
-    lTable *temp3;
-    while(temp2 != NULL){
-        temp3 = temp2->next;
-        temp2->next = temp;
-        temp = temp2;
-        temp2 = temp3;
-    }
-    return temp;
-}
-
 void funcCodeGen(tnode *node){
     while(node != NULL){
         lTable *table = node->left->lEntry;
@@ -387,19 +379,10 @@ void funcCodeGen(tnode *node){
         stCodeGen(node->left);
         returnCodeGen(node->left->right);
         printf("Return code completed\n");
-        table = reverseTable(node->left->lEntry);
-        printf("Reversing table done\n");
+        table = node->left->lEntry;
         while(table != NULL){
             int r1 = getRegNo();
             fprintf(filePtr, "POP R%d\n", r1);
-            int r2 = getRegNo();
-            int r = getRegNo();
-            fprintf(filePtr, "MOV R%d, BP\n", r2);
-            fprintf(filePtr, "MOV R%d, %d\n", r, table->binding);
-            fprintf(filePtr, "ADD R%d, R%d\n", r2, r);
-            fprintf(filePtr, "MOV [R%d], R%d\n", r2, r1);
-            freeReg();
-            freeReg();
             freeReg();
             table = table->next;
         }
