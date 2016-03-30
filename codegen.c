@@ -69,7 +69,7 @@ int opCodeGen(tnode *t){
         }
         case CALL:{
             t = t->left;
-            fprintf(filePtr, "//Called %s\n", t->name);
+            //fprintf(filePtr, "//Called %s\n", t->name);
             int i = 0;
             while(i < regNo){
                 fprintf(filePtr, "PUSH R%d\n", i);
@@ -81,12 +81,15 @@ int opCodeGen(tnode *t){
             fprintf(filePtr, "//Pushing the arguments\n");
             argList *arg = t->gEntry->arg;
             while (temp != NULL){
+                printf("Arg should be %s\n", arg->name);
                 if (arg->passByRef == 0){
-                    fprintf(filePtr, "//For arg %s\n", temp->name);
+                    printf("global arg for %s\n", temp->name);
+                    //fprintf(filePtr, "//For arg %s\n", temp->name);
                     r1 = opCodeGen(temp);
                 }
                 else{
-                    fprintf(filePtr, "//For args %s\n", temp->name);
+                    //printf("local arg for %s\n", temp->name);
+                    //fprintf(filePtr, "//For args %s\n", temp->name);
                     int address;
                     if (temp->lEntry == NULL){
                         address = temp->gEntry->binding;
@@ -234,7 +237,8 @@ int stCodeGen(tnode *t){
     switch (t->nodeType) {
         case STMT:
             while(t != NULL){
-                stCodeGen(t->expr);
+                if (t->expr != NULL)
+                    stCodeGen(t->expr);
                 t = t->left;
             }
             break;
@@ -337,6 +341,8 @@ int stCodeGen(tnode *t){
             fprintf(filePtr, "L%d:\n", l2);
             break;
         }
+        default:
+            break;
     }
     return 0;
 }
@@ -359,10 +365,10 @@ void returnCodeGen(tnode *node){
 
 void funcCodeGen(tnode *node){
     while(node != NULL){
+        printf("Printing for %s\n", node->name);
         lTable *table = node->left->lEntry;
         provideMemoryToLocal(node->name, node->left->lEntry);
         fprintf(filePtr, "//Code Gen for %s function\n", node->name);
-        printf("Printing for %s\n", node->name);
         fprintf(filePtr, "%s:\n", node->name);
         fprintf(filePtr, "PUSH BP\n");
         fprintf(filePtr, "MOV BP, SP\n");
@@ -376,7 +382,8 @@ void funcCodeGen(tnode *node){
             freeReg();
             table = table->next;
         }
-        stCodeGen(node->left);
+        if (node->left != NULL)
+            stCodeGen(node->left);
         returnCodeGen(node->left->right);
         printf("Return code completed\n");
         table = node->left->lEntry;
