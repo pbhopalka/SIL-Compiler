@@ -74,7 +74,7 @@ int checkReturnType(int type1, int type2){
     return 0;
 }
 
-int checkArgumentType(tnode *node){ //check if arguments passed to the functions (or in local decl) are not arrays or functions
+int checkArgumentType(tnode *node){ //check if arguments declared to the functions (or in local decl) are not arrays or functions
     int flag = 0;
     tnode *temp1 = node;
     while (temp1 != NULL){
