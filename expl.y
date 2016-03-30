@@ -117,7 +117,7 @@ ret: RETURN expr ';' 	{$$ = $2;}
 	;
 
 Slist: Stmt Slist       {$$ = makeStatement($1, $2);}
-	 |					{$$ = NULL;}
+	 |					{$$ = makeStatement(NULL, NULL);}
      ;
 
 Stmt: loc ASSG expr ';' 		{$$ = makeAssgNode($1, $3);}
