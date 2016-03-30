@@ -1,15 +1,21 @@
 decl
   integer a[10], b, i, p;
-  integer add1(integer a, c);
+  integer add1(integer &a, &c);
+  integer support(integer &a, &b);
 enddecl
 
-integer add1(integer a, c){
+integer support(integer &a, &b){
+  begin
+    return (a+b);
+  end
+}
+
+integer add1(integer &a, &c){
   decl
     integer b;
   enddecl
   begin
-    b = a + c;
-    p = 10;
+    b = support(a, c);
     return b;
   end
 }
@@ -17,17 +23,13 @@ integer add1(integer a, c){
 integer main(){
   decl
     integer c;
-    boolean e;
+    integer e;
   enddecl
   begin
     i = 0;
-    while(i < 5) do
-        read(a[i]);
-        i = i + 1;
-    endwhile;
-    read(b);
-    c = 9;
-    b = add1(2, 3);
+    read(c);
+    read(e);
+    b = add1(c, e);
     write(b);
     return 0;
   end

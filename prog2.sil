@@ -1,46 +1,45 @@
-DECL
-    integer factorial(integer n);
-    integer n;
+decl
+    integer factorial(integer n), p[10];
     integer swap(integer &x, &y);
-ENDDECL
+enddecl
 
 integer swap(integer &x, &y) {
-    DECL
+    decl
         integer q;
-    ENDDECL
-    BEGIN
+    enddecl
+    begin
         q = x;
         x = y;
         y = q;
         return 1;
-    END
+    end
 }
 
 integer factorial (integer n) {
-    DECL
+    decl
         integer rvalue;
-    ENDDECL
-    BEGIN
+    enddecl
+    begin
         if (n==1 OR n== 0) then
             rvalue = 1;
         else
             rvalue = n * factorial (n-1);
         endif;
         return rvalue;
-    END
+    end
 }
 
 integer main(){
-    DECL
-        integer i, a ;
-    ENDDECL
-    BEGIN
+    decl
+        integer i, a, n;
+    enddecl
+    begin
         read (i);
-        read(a);
-        n = swap(a, i);
+        read(n);
+        a = swap(i, n);
         write(factorial(n));
         write(i);
-        write(a);
+        write(n);
         return 1;
-    END
+    end
 }
