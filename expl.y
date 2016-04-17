@@ -10,9 +10,13 @@
 
 	#include "ast.h"
 	#include "symbolTable.h"
+	#include "typeTable.h"
+	#include "codegen.h"
+	#include "heapManagement.c"
+	#include "typeTable.c"
+	#include "symbolTable.c"
 	#include "errorCheck.c"
 	#include "ast.c"
-	#include "symbolTable.c"
 	#include "codegen.c"
 
 	int yylex(void);
@@ -20,8 +24,9 @@
 
 %}
 
-%token NUM ID BEGIN1 END
+%token NUM ID BEGIN1 END TYPE ENDTYPE
 %token READ WRITE DECL ENDDECL
+%token ALLOC FREEM nullPointer
 %token integer boolean RETURN
 %token IF THEN ELSE ENDIF WHILE DO ENDWHILE BREAK
 %token PLUS SUB ASSG
@@ -35,7 +40,38 @@
 
 %%
 
-prog: declaration funcDef	{printSymbolTable();codeGen($2);exit(0);}
+prog: installType typeBlock declaration funcDef	{printSymbolTable(); printTypeTable(); codeGen($4); exit(0);}
+	;
+
+installType: 						{createTypeTable();}
+			;
+
+typeBlock: TYPE typeDecl ENDTYPE
+		|
+		;
+
+typeDecl: typeDef typeDecl
+		| typeDef
+		;
+
+typeDef: typeHeader typeBody 	{tSearch($1->name)->field = makeFieldList($2);}
+		;
+
+typeHeader: ID '{' 			{tInstall($1->name, NULL);$$ = $1;}
+
+typeBody: fieldList '}' 	{$$ = $1;}
+	   ;
+
+fieldList: fieldDecl fieldList	{$1->left = $2; $$ = $1;}
+		| fieldDecl				{$1->left = NULL; $$ = $1;}
+		;
+
+fieldDecl: type ID ';'			{checkDataType($1);$2->expr = $1; $$ = $2;}
+		;
+
+type: integer		{$$ = assignType("integer");}
+	| boolean		{$$ = assignType("boolean");}
+	| ID			{$$ = assignType($1->name);}
 	;
 
 declaration: DECL decllist ENDDECL 	{provideMemoryToGlobal();}
@@ -45,8 +81,7 @@ decllist: decl decllist
 		|
 		;
 
-decl: integer idlist ';'	{groupGInstall($2, integer);}
-	| boolean idlist ';'	{groupGInstall($2, boolean);}
+decl: type idlist ';'	{checkDataType($1);groupGInstall($2, $1->dataType);}
 	;
 
 idlist: id ',' idlist		{$1->left = $3;$$ = $1;}
@@ -70,8 +105,7 @@ funcList: funcHead funcBody 	{printLocalSymTable($1->name);checkReturnType($1->d
 								$1->left = $2;$$ = $1;lStart = NULL;}
 		;
 
-funcHead: integer ID '(' argument ')' '{'  {$$ = makeFunctionNode($2, integer, $4, NULL);}
-		| boolean ID '(' argument ')' '{'  {$$ = makeFunctionNode($2, boolean, $4, NULL);}
+funcHead: type ID '(' argument ')' '{'  {checkDataType($1);$$ = makeFunctionNode($2, $1->dataType, $4, NULL);}
 		;
 
 funcBody: localDecl body '}'	{$2->lEntry = lStart;$$ = $2;}
@@ -85,8 +119,7 @@ argList: arg ';' argList	{$1->right = $3; $$ = $1;}
 		| arg				{$1->right = NULL; $$ = $1;}
 		;
 
-arg: integer argInput	{$$ = addDataType(integer, $2);} /*checkArgumentType() is called by makeFunctionNode()*/
-	| boolean argInput	{$$ = addDataType(boolean, $2);}
+arg: type argInput	{checkDataType($1);$$ = addDataType($1->dataType, $2);} /*checkArgumentType() is called by makeFunctionNode()*/
 	;
 
 argInput: argID ',' argInput	{$1->left = $3;$$ = $1;}
@@ -105,8 +138,7 @@ lDeclare: lDec lDeclare
 		|
 		;
 
-lDec: integer idlist ';'	{checkArgumentType($2);groupLInstall($2, integer);}
-	| boolean idlist ';'	{checkArgumentType($2);groupLInstall($2, boolean);}
+lDec: type idlist ';'	{checkDataType($1);checkArgumentType($2);groupLInstall($2, $1->dataType);}
 	;
 
 body: BEGIN1 Slist ret END 	{$2->right = $3; $$ = $2;}
@@ -134,7 +166,7 @@ expr: expr PLUS expr 					{$$ = makeOperatorNode(PLUS, $1, $3);}
 	| expr DIV expr 					{$$ = makeOperatorNode(DIV, $1, $3);}
 	| expr MOD expr						{$$ = makeOperatorNode(MOD, $1, $3);}
 	| '(' expr ')' 						{$$ = $2;}
-	| SUB expr     						{$$ = makeOperatorNode(SUB, makeLeaf(0, integer), $2);}
+	| SUB expr     						{$$ = makeOperatorNode(SUB, makeLeaf(0, tSearch("integer")->index), $2);}
 	| expr LT expr						{$$ = makeOperatorNode(LT, $1, $3);}
 	| expr GT expr						{$$ = makeOperatorNode(GT, $1, $3);}
 	| expr LE expr						{$$ = makeOperatorNode(LE, $1, $3);}
@@ -146,11 +178,26 @@ expr: expr PLUS expr 					{$$ = makeOperatorNode(PLUS, $1, $3);}
 	| NOT expr							{$$ = makeBooleanNode(NOT, $2, NULL);}
 	| NUM          						{$$ = $1;}
 	| loc           					{$$ = $1;}
+	| ALLOC								{tnode *temp = (tnode*)malloc(sizeof(tnode));temp->dataType = ALLOC;temp->nodeType = ALLOC;$$ = temp;}
+	| freeBlock							{$$ = $1;}
+	| nullPointer						{tnode *temp = (tnode*)malloc(sizeof(tnode));temp->dataType = VOID;temp->nodeType = VOID;$$ = temp;}
 	;
 
-loc: ID								{$1->expr = NULL;idDeclarationCheck($1);$$ = $1;}
+freeBlock: FREEM '(' loc ')'			{tnode *temp = (tnode*)malloc(sizeof(tnode));temp->dataType = ALLOC;temp->nodeType = FREEM;temp->expr = $3;$$ = temp;}
+		;
+
+userDef: ID '.' varList					{$1->left = NULL;$1->expr = $3;$$ = $1;}
+		| ID '[' expr ']' '.' varList 	{$1->left = $3;$1->expr = $6;$$ = $1;}
+		;
+
+varList: varList '.' ID  				{$1->left = $3;$$ = $1;}
+		| ID 							{$1->left = NULL;$$ = $1;}
+		;
+
+loc: ID								{$1->left = NULL;$1->expr = NULL;idDeclarationCheck($1);$$ = $1;}
 	| ID '[' expr ']'				{$1->lEntry = NULL;$1->left = $3;idDeclarationCheck($1);$$ = $1;}
 	| ID '(' exprList ')'			{idDeclarationCheck($1);checkPassedArgument($1, $3);$$ = makeFunctionCall($1, $3);}
+	| userDef						{$$ = makeUserDefined($1);}
 	;
 
 exprList: expr ',' exprList			{$1->expr = $3; $$ = $1;}
