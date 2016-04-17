@@ -2,6 +2,7 @@
 	#include <stdio.h>
 	#include <stdlib.h>
 	#include "ast.h"
+	#include "typeTable.h"
 
 	#define YYSTYPE tnode*
 	#include "y.tab.h"
@@ -13,6 +14,8 @@
 
 letter [a-zA-Z]
 digit [0-9]+
+openComment "/*"
+closeComment "*/"
 
 %%
 
@@ -28,6 +31,8 @@ digit [0-9]+
 ">="		{return GE;}
 "=="		{return EQ;}
 "!="		{return NE;}
+"type"		{return TYPE;}
+"endtype"	{return ENDTYPE;}
 "read"  	{return READ;}
 "write" 	{return WRITE;}
 "begin" 	{return BEGIN1;}
@@ -46,21 +51,26 @@ digit [0-9]+
 "AND"		{return AND;}
 "OR"		{return OR;}
 "NOT"		{return NOT;}
-"TRUE"		{yylval = makeLeaf(1, boolean);return NUM;}
-"FALSE"		{yylval = makeLeaf(0, boolean);return NUM;}
+"TRUE"		{yylval = makeLeaf(1, tSearch("boolean")->index);return NUM;}
+"FALSE"		{yylval = makeLeaf(0, tSearch("boolean")->index);return NUM;}
 "return"	{return RETURN;}
+"alloc()"	{return ALLOC;}
+"free"		{return FREEM;}
+"NULL"		{return nullPointer;}
 [ \t] 		{}
 [;]   		{return *yytext;}
 [,]			{return *yytext;}
+[.]			{return *yytext;}
 [()] 		{return *yytext;}
 [{}]		{return *yytext;}
 "["			{return *yytext;}
 "]"			{return *yytext;}
 "&"			{return *yytext;}
 {letter}({letter}|{digit})*   {yylval = makeID(yytext);return ID;}
-{digit}  	{number = atoi(yytext); yylval = makeLeaf(number, integer); return NUM;}
+{digit}  	{number = atoi(yytext); printf("Number: %d\n", number);yylval = makeLeaf(number, tSearch("integer")->index); return NUM;}
 
 [\n] 		{lineNo++;}
+["//"][^"\n"]*	{lineNo++;}
 . 			{yyerror("Unknown character.\n");}
 
 %%
