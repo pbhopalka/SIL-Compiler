@@ -1,6 +1,19 @@
+type
+o{
+    integer n;
+    o k;
+}
+
+anotherType{
+    boolean p;
+    integer n;
+}
+endtype
+
 decl
     integer factorial(integer n), p[10];
     integer swap(integer &x, &y);
+    anotherType var2;
 enddecl
 
 integer swap(integer &x, &y) {
@@ -18,6 +31,7 @@ integer swap(integer &x, &y) {
 integer factorial (integer n) {
     decl
         integer rvalue;
+        o variable;
     enddecl
     begin
         if (n==1 OR n== 0) then
@@ -31,15 +45,23 @@ integer factorial (integer n) {
 
 integer main(){
     decl
-        integer i, a, n;
+        integer i;
+        boolean a;
+        o st;
     enddecl
     begin
-        read (i);
-        read(n);
-        a = swap(i, n);
-        write(factorial(n));
-        write(i);
-        write(n);
+        st = alloc();
+        st.k = alloc();
+        write(st);
+        write(st.k);
+        st.n = 5;
+        st.k.n = 4;
+        i = swap (st.n, st.k.n);
+        write(factorial(st.k.n));
+        write(st.n);
+        write(st.k.n);
+        i = free(st.k);
+        i = free(st);
         return 1;
     end
 }
