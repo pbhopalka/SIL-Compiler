@@ -1,4 +1,4 @@
-int memory = 0;
+int memory = 513;
 
 typedef struct argList{
     char *name;
