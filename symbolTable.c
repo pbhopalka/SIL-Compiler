@@ -56,6 +56,7 @@ void provideMemoryToLocal(char *name, lTable *table){
 		temp = temp->next;
 	}
 	printf("Exiting memory\n");
+	return;
 }
 
 void cleanLocalMemory(lTable *table){
