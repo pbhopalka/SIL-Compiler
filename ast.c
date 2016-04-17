@@ -1,6 +1,44 @@
 #include "y.tab.h"
 extern int lineNo;
 
+struct tnode *makeUserDefined(tnode *node){
+	tnode *temp = (tnode*)malloc(sizeof(tnode));
+	temp->nodeType = USERDEF;
+	temp->dataType = node->dataType;
+	typeTable *tab = tTable;
+	while (tab != NULL){
+		if (node->dataType == tab->index)
+			break;
+		tab = tab->next;
+	}
+	tnode *t = node->expr;
+	while(t != NULL){
+		FieldList *f = tab->field;
+		while (f != NULL){
+			if (strcmp(t->name, f->name) == 0){
+				temp->dataType = f->type->index;
+				break;
+			}
+			f = f->next;
+		}
+		t = t->left;
+		if (temp->dataType <= BASIC_OPS && t != NULL){
+			printf("Line : %d :: For a primitive data type, concatenation not allowed\n", lineNo);
+			exit(0);
+		}
+	}
+	temp->left = node;
+	return temp;
+}
+
+struct tnode *assignType(char *name){
+	tnode *temp = (tnode*)malloc(sizeof(tnode));
+	if(tSearch(name) != NULL)
+		temp->dataType = tSearch(name)->index;
+	temp->name = name;
+	return temp;
+}
+
 struct tnode *makeFunctionNode(tnode *id, int type, tnode *argList, tnode *body){
 	if (strcmp("main", id->name))
 		idDeclarationCheck(id);
@@ -51,7 +89,7 @@ struct tnode *makeLeaf(int n, int type){
 	temp = (struct tnode*)malloc(sizeof(struct tnode));
 	temp->name = NULL;
 	temp->dataType = type;
-	if (type == integer){
+	if (type == tSearch("integer")->index){
 		temp->val = n;
 		temp->boolVal = -1;
 	}
@@ -69,13 +107,13 @@ struct tnode *makeLeaf(int n, int type){
 struct tnode *makeOperatorNode(int op, struct tnode *l, struct tnode *r){
 	//idDeclarationCheck(l);
 	//idDeclarationCheck(r);
-	dataTypeCheck(l, r, integer);
+	//dataTypeCheck(l, r, tSearch("integer")->index);
 	struct tnode *temp;
 	temp = (struct tnode*)malloc(sizeof(struct tnode));
 	if (op == GT | op == LT | op == LE | op == GE | op == EQ | op == NE)
-		temp->dataType = boolean;
+		temp->dataType = tSearch("boolean")->index;
 	else
-		temp->dataType = integer;
+		temp->dataType = tSearch("integer")->index;
 	temp->name = NULL;
 	temp->nodeType = op;
 	temp->val = -1;
@@ -110,7 +148,10 @@ struct tnode *makeID(char *id){
 }
 
 struct tnode *makeAssgNode(struct tnode *l, struct tnode *r){
-	dataTypeCheck(l, r, 0);
+	if (r->dataType == VOID)
+		dataTypeCheck(l, r, VOID);
+	else
+		dataTypeCheck(l, r, 0);
 	struct tnode *temp;
 	temp = (struct tnode*)malloc(sizeof(struct tnode));
 	temp->dataType = VOID;
@@ -123,12 +164,12 @@ struct tnode *makeAssgNode(struct tnode *l, struct tnode *r){
 
 struct tnode *makeBooleanNode(int op, struct tnode *l, struct tnode *r){
 	if (op != NOT)
-		dataTypeCheck(l, r, boolean);
+		dataTypeCheck(l, r, tSearch("boolean")->index);
 	else
-		dataTypeCheck(l, NULL, boolean);
+		dataTypeCheck(l, NULL, tSearch("boolean")->index);
 	struct tnode *temp;
 	temp = (struct tnode*)malloc(sizeof(struct tnode));
-	temp->dataType = boolean;
+	temp->dataType = tSearch("boolean")->index;
 	temp->nodeType = op;
 	temp->boolVal = -1;
 	temp->left = l;
@@ -137,7 +178,7 @@ struct tnode *makeBooleanNode(int op, struct tnode *l, struct tnode *r){
 }
 
 struct tnode *makeIONode(int op, struct tnode *node){ //Using t->expr not t->left or t->right
-	dataTypeCheck(node, NULL, integer);
+	//dataTypeCheck(node, NULL, tSearch("integer")->index);
 	tnode *temp;
 	temp = (struct tnode*)malloc(sizeof(tnode));
 	temp->nodeType = op;
@@ -148,7 +189,7 @@ struct tnode *makeIONode(int op, struct tnode *node){ //Using t->expr not t->lef
 }
 
 struct tnode *makeConditionalNode(tnode *expr, tnode *thenPart, tnode *elsePart){
-	dataTypeCheck(expr, NULL, boolean);
+	dataTypeCheck(expr, NULL, tSearch("boolean")->index);
 	tnode *temp;
 	temp = (tnode*)malloc(sizeof(tnode));
 	temp->nodeType = IF;
@@ -159,7 +200,7 @@ struct tnode *makeConditionalNode(tnode *expr, tnode *thenPart, tnode *elsePart)
 }
 
 struct tnode *makeIterativeNode(tnode *expr, tnode *slist){
-	dataTypeCheck(expr, NULL, boolean);
+	dataTypeCheck(expr, NULL, tSearch("boolean")->index);
 	tnode *temp;
 	temp = (tnode*)malloc(sizeof(tnode));
 	temp->nodeType = WHILE;
