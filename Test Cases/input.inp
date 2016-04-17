@@ -1,16 +1,24 @@
-typedef name1{
+type name1{
 	integer b;
 	integer a;
+	name1 c;
 }
+endtype
 decl
-	integer i,main();
+	integer i;
 	name1 A;
 enddecl
 integer main(){
 begin
+	write(A);
+	A = alloc();
+	write(A);
 	read(A.b);
 	read(A.a);
+	write(A.c);
+	read(A.c.b);
 	write(A.b);
+	write(A.c.b);
 	write(A.a);
 	return 0;
 end

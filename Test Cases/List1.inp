@@ -1,0 +1,118 @@
+type List{
+	integer a;
+	List next;
+}
+endtype
+
+//[points](int a, int b){return points[a]<b;}
+
+//Stack Based List Implementation
+
+decl
+	integer in,opt;
+	List Head;
+	integer insert(List &H;integer a); // OPTION 1
+	integer print(List H);			   // OPTION 2
+	List Reverse(List &H);			   // OPTION 3
+	integer deleteHead(List &H);
+enddecl
+
+
+
+integer insert(List &H;integer a){
+	decl
+		List new;
+	enddecl
+	begin
+		new = alloc();
+		new.a = a;
+		if(H == NULL) then
+			H=new;
+			new.next = NULL;
+		else
+			new.next = H;
+			H = new;
+		endif;
+		return 0;
+	end
+}
+
+integer print(List H){
+	decl
+		List t;
+	enddecl
+	begin
+		t=H;
+		while(t!=NULL) do
+			write(t.a);
+			t=t.next;
+		endwhile;
+		return 0;
+	end
+}
+
+integer deleteHead(List &H){
+	decl
+		List a;
+	enddecl
+	begin
+		if(H!=NULL) then
+			a=H.next;
+			in=free(H);
+			H=a;
+		endif;
+		return 0;
+	end
+}
+
+List Reverse(List &H){
+	decl
+		List temp;
+		integer k;
+	enddecl
+	begin
+		if(H!=NULL AND H.next!=NULL) then
+			temp=H.next;
+			H = Reverse(H.next);
+			temp.next=H;
+			H.next = NULL;
+			H=temp;
+		endif;
+		return H;
+	end
+}
+
+integer main(){
+	decl
+		integer val,flag;
+		List t;
+	enddecl
+	begin
+		Head = NULL;
+		flag=1;
+		while(flag==1) do
+			read(opt);
+			if(opt==1) then
+				read(val);
+				in=insert(Head,val);
+			else
+				if(opt==2) then
+					write(11111);
+					in=print(Head);
+					write(11111);
+				else
+					if(opt==3) then
+						t=Reverse(Head);
+					else
+						if (opt==4) then
+							in=deleteHead(Head);
+						else
+							flag=0;
+						endif;
+					endif;
+				endif;
+			endif;
+		endwhile;
+		return 9;
+	end
+}

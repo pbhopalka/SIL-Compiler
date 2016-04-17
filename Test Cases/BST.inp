@@ -1,0 +1,89 @@
+type
+bst{
+	integer a;
+	bst left;
+	bst right;
+}
+endtype
+decl
+	integer in,opt;
+	bst Root;
+	integer insert(bst &h;integer a);
+	integer inOrder(bst h);
+enddecl
+
+integer insert(bst &h;integer a){
+	decl
+		bst temp;
+	enddecl
+	begin
+		if(h==NULL) then
+			temp = alloc();
+			temp.a = a;
+			temp.left = NULL;
+			temp.right = NULL;
+			h=temp;
+		else
+			if(h.a > a) then
+				if(h.left != NULL) then
+					in=insert(h.left,a);
+				else
+					temp = alloc();
+					temp.a=a;
+					temp.left=NULL;
+					temp.right=NULL;
+					h.left=temp;
+				endif;
+			else
+				if(h.right != NULL) then
+					in=insert(h.right,a);
+				else
+					temp = alloc();
+					temp.a=a;
+					temp.left=NULL;
+					temp.right=NULL;
+					h.right=temp;
+				endif;
+			endif;
+		endif;
+		return 1;
+	end
+}
+
+
+integer inOrder(bst h){
+	begin
+		if(h!=NULL) then
+			in=inOrder(h.left);
+			write(h.a);
+			in=inOrder(h.right);
+		endif;
+		return 1;
+	end
+}
+
+integer main(){
+	decl
+		integer val,flag;
+	enddecl
+	begin
+		Root = NULL;
+		flag=1;
+		while(flag==1) do
+			read(opt);
+			if(opt==1) then
+				read(val);
+				in=insert(Root,val);
+			else
+				if(opt==2) then
+						in=inOrder(Root);
+					else
+						flag=0;
+					endif;
+				endif;
+
+		endwhile;
+
+		return 9;
+	end
+}

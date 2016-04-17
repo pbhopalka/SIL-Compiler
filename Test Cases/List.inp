@@ -1,0 +1,97 @@
+type List{
+	integer a;
+	List next;
+}
+endtype
+
+// Arrays in structures
+// Return type as structures
+// Default declarations for structures as NULL
+
+decl
+	integer in,opt;
+	List Head;
+	integer insert(List &H;integer a); 	// OPTION 1
+	integer print(List H); 				// OPTION 2
+	integer Reverse(List &H);			// OPTION 3
+enddecl
+
+
+integer insert(List &H;integer a){
+	decl
+		List new;
+	enddecl
+	begin
+		new = alloc();
+		new.a = a;
+		if(H == NULL) then
+			H=new;
+			new.next = NULL;
+		else
+			new.next = H;
+			H = new;
+		endif;
+		return 0;
+	end
+}
+
+integer print(List H){
+	decl
+		List t;
+	enddecl
+	begin
+		t=H;
+		while(t!=NULL) do
+			write(t.a);
+			t=t.next;
+		endwhile;
+		return 0;
+	end
+}
+
+integer Reverse(List &H){
+	decl
+		List temp1,temp2;
+	enddecl
+	begin
+		if(H!=NULL AND H.next!=NULL) then
+			temp1=H.next;
+			temp2=H.next;
+			H.next=NULL;
+			in=Reverse(temp1);
+			temp2.next=H;
+			H=temp1;
+		endif;
+		return 1;
+	end
+}
+integer main(){
+	decl
+		integer val,flag;
+		List t;
+	enddecl
+	begin
+		Head = NULL;
+		flag=1;
+		while(flag==1) do
+			read(opt);
+			if(opt==1) then
+				read(val);
+				in=insert(Head,val);
+			else
+				if(opt==2) then
+					write(11111);
+					in=print(Head);
+					write(11111);
+				else
+					if(opt==3) then
+						in=Reverse(Head);
+					else
+						flag=0;
+					endif;
+				endif;
+			endif;
+		endwhile;
+		return 9;
+	end
+}
