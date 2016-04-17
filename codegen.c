@@ -1,5 +1,4 @@
 #include "y.tab.h"
-#include "codegen.h"
 
 int getRegNo(){
     if (regNo >= 7){
@@ -23,15 +22,90 @@ int generateLabel(){
     return label;
 }
 
+int getAddress(tnode *t){
+    int address, r1;
+    if (t->lEntry == NULL){ //for global variables
+        address = t->gEntry->binding;
+        r1 = getRegNo();
+        fprintf(filePtr, "MOV R%d, %d\n", r1, address);
+        if (t->left != NULL){//For function arguments, it's going here. Only meant for arrays
+            int offset = opCodeGen(t->left);
+            fprintf(filePtr, "ADD R%d, R%d\n", r1, offset);
+            freeReg();
+        }
+    }
+    else{ //for local variables
+        address = t->lEntry->binding;
+        r1 = getRegNo();
+        int r = getRegNo();
+        fprintf(filePtr, "MOV R%d, BP\n", r1);
+        fprintf(filePtr, "MOV R%d, %d\n", r, address);
+        fprintf(filePtr, "ADD R%d, R%d\n", r1, r);
+        if (t->lEntry->bindingType == 1){
+            fprintf(filePtr, "MOV R%d, [R%d]\n", r1, r1);
+        }
+        freeReg();
+    }
+    return r1;
+}
+
+int getAddUserDefined(tnode *t){
+    fprintf(filePtr, "//Get address for - %s %d\n", t->name, t->nodeType);
+    int r1 = opCodeGen(t);
+    typeTable *tab = tSearchByIndex(t->dataType);
+    fprintf(filePtr, "//Opcode over for %s\n", t->name);
+    t = t->expr;
+    fprintf(filePtr, "//Part of userdefined\n");
+    while (t != NULL){
+        fprintf(filePtr, "//t->name - %s\n", t->name);
+        FieldList *f = fSearch(t->name, tab);
+        if (f != NULL){
+            int offset = f->bindingVal;
+            printf("%d ", offset);
+            int r2 = getRegNo();
+            fprintf(filePtr, "MOV R%d, %d\n", r2, offset);
+            fprintf(filePtr, "ADD R%d, R%d\n", r1, r2);
+            freeReg();
+            if (t->left != NULL)
+                fprintf(filePtr, "MOV R%d, [R%d]\n", r1, r1);
+        }
+        t = t->left;
+    }
+    printf("\n");
+    return r1;
+}
+
 int opCodeGen(tnode *t){
     //printf("Entering for %d\n", t->nodeType);
     int r1, r2;
     //int r2 = getRegNo();
     //printf("Register no: %d %d\n", r1, r2);
     switch (t->nodeType) {
+        case ALLOC:
+            r1 = alloc(); // defined in heapManagement.c
+            break;
+        case FREEM:{
+            printf("Entered here\n");
+            r1 = getAddUserDefined(t->expr);
+            printf("Add for free: %d\n", r1);
+            int dummy = freeMem(r1); //defined in heapManagement.c
+            fprintf(filePtr, "MOV R%d, %d\n", r1, dummy);
+            break;
+        }
+        case VOID:
+            r1 = getRegNo();
+            fprintf(filePtr, "MOV R%d, -1\n", r1);
+            break;
+        case USERDEF:{
+            printf("userdef\n");
+            r1 = getAddUserDefined(t->left);
+            fprintf(filePtr, "MOV R%d, [R%d]\n", r1, r1);
+            printf("opcode over\n");
+            break;
+        }
         case NUM:{
             int value;
-            if (t->dataType == integer)
+            if (t->dataType == (tSearch("integer")->index))
                 value = t->val;
             else
                 value = t->boolVal;
@@ -39,31 +113,10 @@ int opCodeGen(tnode *t){
             fprintf(filePtr, "MOV R%d, %d\n", r1, value);
             break;
         }
-        case ID:{
+        case ID:{ //change in code here because now you might need to put in heap
             printf("Enter ID\n");
-            int address;
-            if (t->lEntry == NULL){
-                address = t->gEntry->binding;
-                r1 = getRegNo();
-                fprintf(filePtr, "MOV R%d, %d\n", r1, address);
-                if (t->left != NULL){//For function arguments, it's going here. Only meant for arrays
-                    int offset = opCodeGen(t->left);
-                    fprintf(filePtr, "ADD R%d, R%d\n", r1, offset);
-                    freeReg();
-                }
-            }
-            else{
-                address = t->lEntry->binding;
-                r1 = getRegNo();
-                int r = getRegNo();
-                fprintf(filePtr, "MOV R%d, BP\n", r1);
-                fprintf(filePtr, "MOV R%d, %d\n", r, address);
-                fprintf(filePtr, "ADD R%d, R%d\n", r1, r);
-                if (t->lEntry->bindingType == 1){
-                    fprintf(filePtr, "MOV R%d, [R%d]\n", r1, r1);
-                }
-                freeReg();
-            }
+            r1 = getAddress(t);
+            printf("Val of r1: %d\n", r1);
             fprintf(filePtr, "MOV R%d, [R%d]\n", r1, r1);
             break;
         }
@@ -89,30 +142,11 @@ int opCodeGen(tnode *t){
                 }
                 else{
                     //printf("local arg for %s\n", temp->name);
-                    //fprintf(filePtr, "//For args %s\n", temp->name);
-                    int address;
-                    if (temp->lEntry == NULL){
-                        address = temp->gEntry->binding;
-                        r1 = getRegNo();
-                        fprintf(filePtr, "MOV R%d, %d\n", r1, address);
-                        if (temp->left != NULL){//For function arguments, it's going here. Only meant for arrays
-                            int offset = opCodeGen(temp->left);
-                            fprintf(filePtr, "ADD R%d, R%d\n", r1, offset);
-                            freeReg();
-                        }
-                    }
-                    else{
-                        address = temp->lEntry->binding;
-                        r1 = getRegNo();
-                        int r = getRegNo();
-                        fprintf(filePtr, "MOV R%d, BP\n", r1);
-                        fprintf(filePtr, "MOV R%d, %d\n", r, address);
-                        fprintf(filePtr, "ADD R%d, R%d\n", r1, r);
-                        if (temp->lEntry->bindingType == 1){
-                            fprintf(filePtr, "MOV R%d, [R%d]\n", r1, r1);
-                        }
-                        freeReg();
-                    }
+                    fprintf(filePtr, "//For args %s\n", temp->name);
+                    if (temp->nodeType == USERDEF)
+                        r1 = getAddUserDefined(temp->left);
+                    else
+                        r1 = getAddress(temp);
                 }
                 fprintf(filePtr, "PUSH R%d\n", r1);
                 freeReg();
@@ -225,7 +259,7 @@ int opCodeGen(tnode *t){
             fprintf(filePtr, "EQ R%d, 0\n", r1);
             break;
         default:
-            printf("Error in codegen\n");
+            printf("Error in codegen for %d type\n", t->nodeType);
             exit(0);
     }
     return r1;
@@ -243,29 +277,13 @@ int stCodeGen(tnode *t){
             }
             break;
         case ASSG:{
-            int address;
-            if (t->left->lEntry == NULL){
-                address = t->left->gEntry->binding;
-                r1 = getRegNo();
-                fprintf(filePtr, "MOV R%d, %d\n", r1, address);
-                if (t->left->left != NULL){
-                    int offset = opCodeGen(t->left->left);
-                    fprintf(filePtr, "ADD R%d, R%d\n", r1, offset);
-                    freeReg();
-                }
-            }
-            else{
-                address = t->left->lEntry->binding;
-                r1 = getRegNo();
-                int r = getRegNo();
-                fprintf(filePtr, "MOV R%d, BP\n", r1);
-                fprintf(filePtr, "MOV R%d, %d\n", r, address);
-                fprintf(filePtr, "ADD R%d, R%d\n", r1, r);
-                if (t->left->lEntry->bindingType == 1){
-                    fprintf(filePtr, "MOV R%d, [R%d]\n", r1, r1);
-                }
-                freeReg();
-            }
+            printf("\nNodetype: %d\n\n", t->left->nodeType);
+            if (t->left->nodeType == USERDEF)
+                r1 = getAddUserDefined(t->left->left);
+            else
+                r1 = getAddress(t->left);
+            printf("Val of r1 in ASSG: %d\n", r1);
+            fprintf(filePtr, "//Right side\n");
             int r2 = opCodeGen(t->right);
             printf("After opCodeGen\n");
             fprintf(filePtr, "MOV [R%d], R%d\n", r1, r2);
@@ -274,30 +292,10 @@ int stCodeGen(tnode *t){
             break;
         }
         case READ:{
-            int address;
-            if (t->expr->lEntry == NULL){
-                printf("Enter global\n");
-                address = t->expr->gEntry->binding;
-                r1 = getRegNo();
-                fprintf(filePtr, "MOV R%d, %d\n", r1, address);
-                if (t->expr->left != NULL){
-                    int offset = opCodeGen(t->expr->left);
-                    fprintf(filePtr, "ADD R%d, R%d\n", r1, offset);
-                    freeReg();
-                }
-            }
-            else{
-                address = t->expr->lEntry->binding;
-                r1 = getRegNo();
-                int r = getRegNo();
-                fprintf(filePtr, "MOV R%d, BP\n", r1);
-                fprintf(filePtr, "MOV R%d, %d\n", r, address);
-                fprintf(filePtr, "ADD R%d, R%d\n", r1, r);
-                if (t->expr->lEntry->bindingType == 1){
-                    fprintf(filePtr, "MOV R%d, [R%d]\n", r1, r1);
-                }
-                freeReg();
-            }
+            if (t->expr->nodeType == USERDEF)
+                r1 = getAddUserDefined(t->expr->left);
+            else
+                r1 = getAddress(t->expr);
             printf("Register address in READ\n");
             int r2 = getRegNo();
             fprintf(filePtr, "IN R%d\n", r2);
@@ -404,13 +402,14 @@ void funcCodeGen(tnode *node){
 void codeGen(tnode *t){
     filePtr = fopen("simulator/asmCode.asm", "w+");
     fprintf(filePtr, "START\n");
-    fprintf(filePtr, "MOV BP, 0\n");
+    fprintf(filePtr, "MOV BP, 513\n");
     fprintf(filePtr, "MOV SP, %d\n", memory);
     int i = 0;
     while (i < regNo){
         fprintf(filePtr, "PUSH R%d\n", i);
         i++;
     }
+    fprintf(filePtr, "CALL initialize\n");
     fprintf(filePtr, "CALL main\n");
     while (i > 0){
         fprintf(filePtr, "POP R%d\n", i);
@@ -418,6 +417,7 @@ void codeGen(tnode *t){
     }
     fprintf(filePtr, "HALT\n");
     fprintf(filePtr, "\n");
+    initialize(filePtr);
     funcCodeGen(t);
     fclose(filePtr);
     return;
