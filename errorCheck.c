@@ -1,6 +1,18 @@
 #include "y.tab.h"
 extern int lineNo;
 
+
+int checkDataType(tnode *node){
+    if (strcmp(node->name, "integer") && strcmp(node->name, "boolean")){
+        if(tSearch(node->name) == NULL){
+            printf("Line : %d :: %s data Type does not exist\n", lineNo, node->name);
+            exit(0);
+        }
+    }
+    return 0;
+}
+
+
 /*What happens if it is declared as not pass by reference but defined as passByRef = True*/
 
 int checkArrayDeclaration(tnode *node){
@@ -40,25 +52,34 @@ int idDeclarationCheck(tnode *r){
 
 int dataTypeCheck(tnode *l, tnode *r, int type){
     if (type == 0){ //This is meant for Assignment operation
-        if (l->dataType != r->dataType){
-            printf("Line: %d :: Invalid data type declarations\n", lineNo);
-            exit(1);
+        if (r->dataType != ALLOC){
+            if (l->dataType != r->dataType){
+                printf("Line: %d :: sInvalid data type declarations\n", lineNo);
+                exit(1);
+            }
+            if (l->nodeType != ID && l->nodeType != USERDEF){
+                printf("Line: %d :: Left side of ASSG has to be a variable.\n", lineNo);
+        		exit(1);
+            }
         }
-        if (l->nodeType != ID){
-            printf("Line: %d :: Left side of ASSG has to be a variable.\n", lineNo);
-    		exit(1);
+    }
+    else if (type == VOID){
+        if (l->dataType <= BASIC_OPS){
+            printf("Line: %d :: NULL has been assigned to basic data types\n", lineNo);
+            exit(0);
         }
     }
     else{
         if (l != NULL){
+            //printf("%d %d\n", l->dataType, type);
             if (l->dataType != type){
-        		printf("Line: %d :: Invalid data type declarations\n", lineNo);
+        		printf("Line: %d :: pInvalid data type declarations\n", lineNo);
         		exit(1);
         	}
         }
         if (r != NULL){
             if (r->dataType != type){
-        		printf("Line: %d :: Invalid data type declarations\n", lineNo);
+        		printf("Line: %d :: qInvalid data type declarations\n", lineNo);
         		exit(1);
         	}
         }
@@ -114,7 +135,7 @@ int searchArgList(argList *arg, tnode *argument){
 
 int checkFunctionDecl(char *name, int type, tnode *argument){
     if (strcmp(name, "main") == 0){
-        if (type != integer){
+        if (type != tSearch("integer")->index){
             printf("Line : %d :: Return type of main is integer\n", lineNo);
             exit(0);
         }
