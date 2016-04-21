@@ -14,12 +14,18 @@ struct tnode *makeUserDefined(tnode *node){
 	tnode *t = node->expr;
 	while(t != NULL){
 		FieldList *f = tab->field;
+		int flag = 0;
 		while (f != NULL){
 			if (strcmp(t->name, f->name) == 0){
 				temp->dataType = f->type->index;
+				flag = 1;
 				break;
 			}
 			f = f->next;
+		}
+		if (flag == 0){
+			printf("Line: %d :: The next var does not exist for %s\n", lineNo, t->name);
+			exit(0);
 		}
 		t = t->left;
 		if (temp->dataType <= BASIC_OPS && t != NULL){
