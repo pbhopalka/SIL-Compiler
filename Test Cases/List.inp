@@ -4,16 +4,13 @@ type List{
 }
 endtype
 
-// Arrays in structures
-// Return type as structures
-// Default declarations for structures as NULL
-
 decl
 	integer in,opt;
-	List Head;
+	List Head, newList;
 	integer insert(List &H;integer a); 	// OPTION 1
 	integer print(List H); 				// OPTION 2
-	integer Reverse(List &H);			// OPTION 3
+	integer Reverse(List H);			// OPTION 3
+	integer copy(List H);
 enddecl
 
 
@@ -38,46 +35,79 @@ integer insert(List &H;integer a){
 integer print(List H){
 	decl
 		List t;
+		integer a;
 	enddecl
 	begin
 		t=H;
-		while(t!=NULL) do
+		if(t!=NULL) then
 			write(t.a);
-			t=t.next;
-		endwhile;
+			a = print(t.next);
+		endif;
 		return 0;
 	end
 }
 
-integer Reverse(List &H){
+integer Reverse(List H){
 	decl
-		List temp1,temp2;
+		List temp1,temp2, temp3;
 	enddecl
 	begin
-		if(H!=NULL AND H.next!=NULL) then
-			temp1=H.next;
-			temp2=H.next;
-			H.next=NULL;
-			in=Reverse(temp1);
-			temp2.next=H;
-			H=temp1;
-		endif;
+		temp1 = NULL;
+		temp2 = H;
+		while(temp2!=NULL) do
+			temp3 = temp2.next;
+			temp2.next=temp1;
+			temp1 = temp2;
+			temp2 = temp3;
+		endwhile;
+		newList = temp1;
 		return 1;
 	end
 }
+
+integer copy(List H){
+	decl
+		List temp, temp2;
+	enddecl
+	begin
+		temp = alloc();
+		temp.a = H.a;
+		temp2 = temp;
+		temp2.next = NULL;
+		H = H.next;
+		while(H != NULL) do
+			temp.next = alloc();
+			temp.next.a = H.a;
+			temp = temp.next;
+			temp.next = NULL;
+			H = H.next;
+		endwhile;
+		newList = temp2;
+		return 0;
+	end
+}
+
 integer main(){
 	decl
 		integer val,flag;
-		List t;
+		List t, temp;
 	enddecl
 	begin
 		Head = NULL;
+		newList = NULL;
 		flag=1;
 		while(flag==1) do
 			read(opt);
+			if (opt==-1) then
+				flag = 0;
+			endif;
 			if(opt==1) then
 				read(val);
-				in=insert(Head,val);
+				while (val!=-1) do
+					in=insert(Head,val);
+					read(val);
+				endwhile;
+				write(1111);
 			else
 				if(opt==2) then
 					write(11111);
@@ -85,9 +115,19 @@ integer main(){
 					write(11111);
 				else
 					if(opt==3) then
-						in=Reverse(Head);
+						in = copy(Head);
+						write(1111);
+						in=Reverse(newList);
+						in=print(newList);
+						write(111);
 					else
-						flag=0;
+						if (opt==4) then
+							write(111);
+							in=print(newList);
+							write(111);
+						else
+							flag=0;
+						endif;
 					endif;
 				endif;
 			endif;

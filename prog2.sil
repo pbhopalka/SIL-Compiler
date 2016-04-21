@@ -54,6 +54,7 @@ integer main(){
         st.k = alloc();
         write(st);
         write(st.k);
+        //st.p = 3;
         st.n = 5;
         st.k.n = 4;
         i = swap (st.n, st.k.n);
