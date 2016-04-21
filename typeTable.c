@@ -1,5 +1,6 @@
 typeTable *tTable = NULL;
 int indexForTable = 3;
+extern int lineNo;
 
 void createTypeTable(){
     typeTable *temp;
@@ -110,6 +111,10 @@ void *groupTInstall(tnode *node){
 }
 
 void *tInstall(char *name, FieldList *field){
+    if (tSearch(name) != NULL){
+        printf("'%s' type already exists\n", name);
+        exit(0);
+    }
     typeTable *temp;
     temp = (typeTable*)malloc(sizeof(typeTable));
     temp->index = indexForTable;
