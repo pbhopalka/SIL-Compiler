@@ -1,68 +1,49 @@
 type
-o{
-    integer n;
-    o k;
-}
-
-anotherType{
-    boolean p;
-    integer n;
-}
+    number{
+        pair p;
+    }
 endtype
 
 decl
-    integer factorial(integer n), p[10];
-    integer swap(integer &x, &y);
-    anotherType var2;
+    number add1(number number1, number2);
+    pair pairVal;
 enddecl
 
-integer swap(integer &x, &y) {
+number add1(number number1, number2){
     decl
-        integer q;
+        integer m, n, p, q;
+        number r;
     enddecl
     begin
-        q = x;
-        x = y;
-        y = q;
-        return 1;
-    end
-}
-
-integer factorial (integer n) {
-    decl
-        integer rvalue;
-        o variable;
-    enddecl
-    begin
-        if (n==1 OR n== 0) then
-            rvalue = 1;
-        else
-            rvalue = n * factorial (n-1);
-        endif;
-        return rvalue;
+        r = alloc();
+        m = fst(number1.p) * fst(number2.p); // a*c
+        n = snd(number1.p) * snd(number2.p); // b*d
+        p = fst(number1.p) * snd(number2.p); // a*d
+        q = snd(number1.p) * fst(number2.p); // b*c
+        m = m - n;                      // ac-bd
+        n = p + q;                      // ad+bc
+        r.p = (m, n);
+        return r;
     end
 }
 
 integer main(){
     decl
-        integer i;
-        boolean a;
-        o st;
+        integer i, p, q;
+        number a, b, c;
     enddecl
     begin
-        st = alloc();
-        st.k = alloc();
-        write(st);
-        write(st.k);
-        //st.p = 3;
-        st.n = 5;
-        st.k.n = 4;
-        i = swap (st.n, st.k.n);
-        write(factorial(st.k.n));
-        write(st.n);
-        write(st.k.n);
-        i = free(st.k);
-        i = free(st);
+        a = alloc();
+        b = alloc();
+        read(p);
+        read(q);
+        a.p = (p, q);
+        read(p);
+        read(q);
+        b.p = (p, q);
+        c = add1(a, b);
+        write(fst(c.p));
+        write(snd(c.p));
         return 1;
     end
 }

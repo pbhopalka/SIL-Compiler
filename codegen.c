@@ -1,5 +1,7 @@
 #include "y.tab.h"
 
+int pairMem = 0;
+
 int getRegNo(){
     if (regNo >= 7){
         printf("Registers out of bound\n");
@@ -23,6 +25,7 @@ int generateLabel(){
 }
 
 int getAddress(tnode *t){
+    printf("Address for %s\n", t->name);
     int address, r1;
     if (t->lEntry == NULL){ //for global variables
         address = t->gEntry->binding;
@@ -81,6 +84,27 @@ int opCodeGen(tnode *t){
     //int r2 = getRegNo();
     //printf("Register no: %d %d\n", r1, r2);
     switch (t->nodeType) {
+        case FST:
+            r1 = opCodeGen(t->left);
+            fprintf(filePtr, "MOV R%d, [R%d]\n", r1, r1);
+            break;
+        case SND:
+            r1 = opCodeGen(t->left);
+            r2 = getRegNo();
+            fprintf(filePtr, "MOV R%d, 1\n", r2);
+            fprintf(filePtr, "ADD R%d, R%d\n", r1, r2);
+            freeReg();
+            fprintf(filePtr, "MOV R%d, [R%d]\n", r1, r1);
+            break;
+        case PAIR:
+            r1 = opCodeGen(t->left);
+            r2 = opCodeGen(t->right);
+            fprintf(filePtr, "PUSH R%d\n", r1);
+            fprintf(filePtr, "MOV R%d, SP\n", r1);
+            fprintf(filePtr, "PUSH R%d\n", r2);
+            pairMem++;
+            freeReg();
+            break;
         case ALLOC:
             r1 = alloc(); // defined in heapManagement.c
             break;
@@ -141,12 +165,20 @@ int opCodeGen(tnode *t){
                     r1 = opCodeGen(temp);
                 }
                 else{
-                    //printf("local arg for %s\n", temp->name);
+                    printf("local arg for %s %d\n", temp->name, temp->nodeType);
                     fprintf(filePtr, "//For args %s\n", temp->name);
-                    if (temp->nodeType == USERDEF)
+                    if (temp->nodeType == USERDEF){
+                        printf("Here 3\n");
                         r1 = getAddUserDefined(temp->left);
-                    else
+                    }
+                    else if (temp->nodeType == FST || temp->nodeType == SND){
+                        printf("Here 2\n");
+                        r1 = getAddress(temp->left);
+                    }
+                    else{
+                        printf("Here entered\n");
                         r1 = getAddress(temp);
+                    }
                 }
                 fprintf(filePtr, "PUSH R%d\n", r1);
                 freeReg();
@@ -364,6 +396,7 @@ void returnCodeGen(tnode *node){
 void funcCodeGen(tnode *node){
     while(node != NULL){
         printf("Printing for %s\n", node->name);
+        pairMem = 0;
         lTable *table = node->left->lEntry;
         provideMemoryToLocal(node->name, node->left->lEntry);
         fprintf(filePtr, "//Code Gen for %s function\n", node->name);
@@ -384,6 +417,13 @@ void funcCodeGen(tnode *node){
             stCodeGen(node->left);
         returnCodeGen(node->left->right);
         printf("Return code completed\n");
+        while(pairMem > 0){
+            int r1 = getRegNo();
+            fprintf(filePtr, "POP R%d\n", r1);
+            fprintf(filePtr, "POP R%d\n", r1);
+            freeReg();
+            pairMem--;
+        }
         table = node->left->lEntry;
         while(table != NULL){
             int r1 = getRegNo();

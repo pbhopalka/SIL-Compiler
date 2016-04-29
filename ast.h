@@ -2,13 +2,14 @@
 #define FUNC 1
 #define CALL 2
 #define USERDEF 3
+#define PAIR 4
 #define VOID -1
 #define VAR 0
 #define ARR 2
 #define TRUE 1
 #define FALSE 0
 
-#define BASIC_OPS 2
+#define BASIC_OPS 3
 
 //extern int lineNo = 1; //For printing the line number. Incremented in lex when \n is encountered
 

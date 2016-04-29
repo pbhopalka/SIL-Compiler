@@ -22,12 +22,15 @@
 	int yylex(void);
 	int yyerror(char const *s);
 
+	/*Adding code for pair = (expr, expr)*/
+
 %}
 
 %token NUM ID BEGIN1 END TYPE ENDTYPE
 %token READ WRITE DECL ENDDECL
 %token ALLOC FREEM nullPointer
-%token integer boolean RETURN
+%token FST SND
+%token integer boolean pair RETURN
 %token IF THEN ELSE ENDIF WHILE DO ENDWHILE BREAK
 %token PLUS SUB ASSG
 %token MUL DIV MOD
@@ -71,6 +74,7 @@ fieldDecl: type ID ';'			{checkDataType($1);$2->expr = $1; $$ = $2;}
 
 type: integer		{$$ = assignType("integer");}
 	| boolean		{$$ = assignType("boolean");}
+	| pair			{$$ = assignType("pair");}		//code in ast.c
 	| ID			{$$ = assignType($1->name);}
 	;
 
@@ -181,6 +185,9 @@ expr: expr PLUS expr 					{$$ = makeOperatorNode(PLUS, $1, $3);}
 	| ALLOC								{tnode *temp = (tnode*)malloc(sizeof(tnode));temp->dataType = ALLOC;temp->nodeType = ALLOC;$$ = temp;}
 	| freeBlock							{$$ = $1;}
 	| nullPointer						{tnode *temp = (tnode*)malloc(sizeof(tnode));temp->dataType = VOID;temp->nodeType = VOID;$$ = temp;}
+	| '(' expr ',' expr ')'				{$$ = makePairNode($2, $4);}
+	| FST '(' loc ')'					{$$ = makeRetrPairNode($3, FST);}
+	| SND '(' loc ')'					{$$ = makeRetrPairNode($3, SND);}
 	;
 
 freeBlock: FREEM '(' loc ')'			{tnode *temp = (tnode*)malloc(sizeof(tnode));temp->dataType = ALLOC;temp->nodeType = FREEM;temp->expr = $3;$$ = temp;}

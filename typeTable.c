@@ -16,6 +16,7 @@ void createTypeTable(){
     temp->field = NULL;
     temp->next = tTable;
     tTable = temp;
+    tInstall("pair", NULL);
     printf("Type table created\n");
     return;
 }

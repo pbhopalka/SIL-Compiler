@@ -1,0 +1,51 @@
+type
+    user{
+        pair x;
+        user next;
+    }
+endtype
+
+decl
+    pair add1(pair number1, number2, &number3);
+    pair pairVal;
+enddecl
+
+pair add1(pair number1, number2, &number3){
+    decl
+        integer m, n, p, q;
+        pair r;
+    enddecl
+    begin
+        m = fst(number1) * fst(number2); // a*c
+        n = snd(number1) * snd(number2); // b*d
+        p = fst(number1) * snd(number2); // a*d
+        q = snd(number1) * fst(number2); // b*c
+        m = m - n;                      // ac-bd
+        n = p + q;                      // ad+bc
+        r = (m, n);
+        return r;
+    end
+}
+
+integer main(){
+    decl
+        integer i, p, q;
+        pair number1, number2, number3, result;
+        user k;
+    enddecl
+    begin
+        read(p);
+        read(q);
+        number1 = (p, q);
+        read(p);
+        read(q);
+        number2 = (p, q);
+        read(p);
+        read(q);
+        k.x = (p,q);
+        result = add1(number1, k.x, number3);
+        write(fst(result));
+        write(snd(result));
+        return 1;
+    end
+}

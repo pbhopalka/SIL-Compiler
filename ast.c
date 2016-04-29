@@ -1,6 +1,25 @@
 #include "y.tab.h"
 extern int lineNo;
 
+struct tnode *makePairNode(tnode *expr1, tnode *expr2){
+	dataTypeCheck(expr1, expr2, tSearch("integer")->index);
+	tnode *temp = (tnode*)malloc(sizeof(tnode));
+	temp->nodeType = PAIR;
+	temp->dataType = tSearch("pair")->index;
+	temp->left = expr1;
+	temp->right = expr2;
+	return temp;
+}
+
+struct tnode *makeRetrPairNode(tnode *id, int type){
+	tnode *temp = (tnode*)malloc(sizeof(tnode));
+	temp->nodeType = type;
+	temp->dataType = tSearch("integer")->index;
+	temp->left = id;
+	temp->right = NULL;
+	temp->expr = NULL;
+}
+
 struct tnode *makeUserDefined(tnode *node){
 	tnode *temp = (tnode*)malloc(sizeof(tnode));
 	temp->nodeType = USERDEF;

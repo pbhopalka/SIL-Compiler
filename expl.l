@@ -57,6 +57,9 @@ closeComment "*/"
 "alloc()"	{return ALLOC;}
 "free"		{return FREEM;}
 "NULL"		{return nullPointer;}
+"pair"		{return pair;}
+"fst"		{return FST;}
+"snd"		{return SND;}
 [ \t] 		{}
 [;]   		{return *yytext;}
 [,]			{return *yytext;}

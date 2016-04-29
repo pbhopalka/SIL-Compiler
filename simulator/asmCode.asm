@@ -1,6 +1,6 @@
 START
 MOV BP, 513
-MOV SP, 517
+MOV SP, 514
 CALL initialize
 CALL main
 HALT
@@ -42,11 +42,19 @@ MOV [496], 512
 MOV [496], -1
 RET
 
-//Code Gen for insert function
-insert:
+//Code Gen for add1 function
+add1:
 PUSH BP
 MOV BP, SP
 MOV R0, 1
+PUSH R0
+MOV R0, 2
+PUSH R0
+MOV R0, 3
+PUSH R0
+MOV R0, 4
+PUSH R0
+MOV R0, 5
 PUSH R0
 MOV R0, -3
 PUSH R0
@@ -61,273 +69,190 @@ MOV R1, [512]
 MOV [512], [R1]
 
 MOV [R0], R1
-//Get address for - new 259
 MOV R0, BP
-MOV R1, 1
-ADD R0, R1
-MOV R0, [R0]
-//Opcode over for new
-//Part of userdefined
-//t->name - a
-MOV R1, 0
+MOV R1, 5
 ADD R0, R1
 //Right side
-MOV R1, BP
-MOV R2, -3
-ADD R1, R2
-MOV R1, [R1]
-MOV [R0], R1
-MOV R0, BP
-MOV R1, -4
-ADD R0, R1
-MOV R0, [R0]
-MOV R0, [R0]
-MOV R1, -1
-EQ R0, R1
-JZ R0, L1
-MOV R0, BP
-MOV R1, -4
-ADD R0, R1
-MOV R0, [R0]
-//Right side
-MOV R1, BP
-MOV R2, 1
-ADD R1, R2
-MOV R1, [R1]
-MOV [R0], R1
-//Get address for - new 259
-MOV R0, BP
-MOV R1, 1
-ADD R0, R1
-MOV R0, [R0]
-//Opcode over for new
-//Part of userdefined
-//t->name - next
-MOV R1, 1
-ADD R0, R1
-//Right side
-MOV R1, -1
-MOV [R0], R1
-JMP L2
-L1:
-//Get address for - new 259
-MOV R0, BP
-MOV R1, 1
-ADD R0, R1
-MOV R0, [R0]
-//Opcode over for new
-//Part of userdefined
-//t->name - next
-MOV R1, 1
-ADD R0, R1
-//Right side
+//Get address for - number1 259
 MOV R1, BP
 MOV R2, -4
 ADD R1, R2
 MOV R1, [R1]
-MOV R1, [R1]
-MOV [R0], R1
-MOV R0, BP
-MOV R1, -4
-ADD R0, R1
-MOV R0, [R0]
-//Right side
-MOV R1, BP
+//Opcode over for number1
+//Part of userdefined
+//t->name - p
 MOV R2, 1
 ADD R1, R2
 MOV R1, [R1]
+MOV R1, [R1]
+//Get address for - number2 259
+MOV R2, BP
+MOV R3, -3
+ADD R2, R3
+MOV R2, [R2]
+//Opcode over for number2
+//Part of userdefined
+//t->name - p
+MOV R3, 1
+ADD R2, R3
+MOV R2, [R2]
+MOV R2, [R2]
+MUL R1, R2
 MOV [R0], R1
-L2:
-//Printing for return
-MOV R1, 0
 MOV R0, BP
-MOV R2, 2
-SUB R0, R2
-MOV [R0], R1
-POP R0
-POP R0
-POP R0
-POP BP
-RET
-
-//Code Gen for print function
-print:
-PUSH BP
-MOV BP, SP
-MOV R0, 1
-PUSH R0
-MOV R0, 2
-PUSH R0
-MOV R0, -3
-PUSH R0
-MOV R0, BP
-MOV R1, 2
+MOV R1, 4
 ADD R0, R1
 //Right side
+//Get address for - number1 259
 MOV R1, BP
-MOV R2, -3
+MOV R2, -4
 ADD R1, R2
 MOV R1, [R1]
-MOV [R0], R1
-MOV R0, BP
-MOV R1, 2
-ADD R0, R1
-MOV R0, [R0]
-MOV R1, -1
-NE R0, R1
-JZ R0, L3
-//Code for WRITE
-//Get address for - t 259
-MOV R0, BP
-MOV R1, 2
-ADD R0, R1
-MOV R0, [R0]
-//Opcode over for t
+//Opcode over for number1
 //Part of userdefined
-//t->name - a
-MOV R1, 0
-ADD R0, R1
-MOV R0, [R0]
-OUT R0
-MOV R0, BP
-MOV R1, 1
-ADD R0, R1
-//Right side
-PUSH R0
-//Pushing the arguments
-//Get address for - t 259
-MOV R1, BP
-MOV R2, 2
-ADD R1, R2
-MOV R1, [R1]
-//Opcode over for t
-//Part of userdefined
-//t->name - next
+//t->name - p
 MOV R2, 1
 ADD R1, R2
 MOV R1, [R1]
-PUSH R1
-//Pushing arguments done
-PUSH R1
-CALL print
-POP R1
-//Popping off arguments
-POP R2
-//Popping arguments done
-POP R0
-//Calling done
+MOV R2, 1
+ADD R1, R2
+MOV R1, [R1]
+//Get address for - number2 259
+MOV R2, BP
+MOV R3, -3
+ADD R2, R3
+MOV R2, [R2]
+//Opcode over for number2
+//Part of userdefined
+//t->name - p
+MOV R3, 1
+ADD R2, R3
+MOV R2, [R2]
+MOV R3, 1
+ADD R2, R3
+MOV R2, [R2]
+MUL R1, R2
 MOV [R0], R1
-JMP L4
-L3:
-L4:
-//Printing for return
-MOV R1, 0
-MOV R0, BP
-MOV R2, 2
-SUB R0, R2
-MOV [R0], R1
-POP R0
-POP R0
-POP R0
-POP BP
-RET
-
-//Code Gen for Reverse function
-Reverse:
-PUSH BP
-MOV BP, SP
-MOV R0, 1
-PUSH R0
-MOV R0, 2
-PUSH R0
-MOV R0, 3
-PUSH R0
-MOV R0, -3
-PUSH R0
 MOV R0, BP
 MOV R1, 3
 ADD R0, R1
 //Right side
-MOV R1, -1
-MOV [R0], R1
-MOV R0, BP
-MOV R1, 2
-ADD R0, R1
-//Right side
+//Get address for - number1 259
 MOV R1, BP
-MOV R2, -3
+MOV R2, -4
 ADD R1, R2
 MOV R1, [R1]
-MOV [R0], R1
-L5:
-MOV R0, BP
-MOV R1, 2
-ADD R0, R1
-MOV R0, [R0]
-MOV R1, -1
-NE R0, R1
-JZ R0, L6
-MOV R0, BP
-MOV R1, 1
-ADD R0, R1
-//Right side
-//Get address for - temp2 259
-MOV R1, BP
-MOV R2, 2
-ADD R1, R2
-MOV R1, [R1]
-//Opcode over for temp2
+//Opcode over for number1
 //Part of userdefined
-//t->name - next
+//t->name - p
 MOV R2, 1
 ADD R1, R2
 MOV R1, [R1]
+MOV R1, [R1]
+//Get address for - number2 259
+MOV R2, BP
+MOV R3, -3
+ADD R2, R3
+MOV R2, [R2]
+//Opcode over for number2
+//Part of userdefined
+//t->name - p
+MOV R3, 1
+ADD R2, R3
+MOV R2, [R2]
+MOV R3, 1
+ADD R2, R3
+MOV R2, [R2]
+MUL R1, R2
 MOV [R0], R1
-//Get address for - temp2 259
 MOV R0, BP
 MOV R1, 2
 ADD R0, R1
-MOV R0, [R0]
-//Opcode over for temp2
+//Right side
+//Get address for - number1 259
+MOV R1, BP
+MOV R2, -4
+ADD R1, R2
+MOV R1, [R1]
+//Opcode over for number1
 //Part of userdefined
-//t->name - next
-MOV R1, 1
+//t->name - p
+MOV R2, 1
+ADD R1, R2
+MOV R1, [R1]
+MOV R2, 1
+ADD R1, R2
+MOV R1, [R1]
+//Get address for - number2 259
+MOV R2, BP
+MOV R3, -3
+ADD R2, R3
+MOV R2, [R2]
+//Opcode over for number2
+//Part of userdefined
+//t->name - p
+MOV R3, 1
+ADD R2, R3
+MOV R2, [R2]
+MOV R2, [R2]
+MUL R1, R2
+MOV [R0], R1
+MOV R0, BP
+MOV R1, 5
+ADD R0, R1
+//Right side
+MOV R1, BP
+MOV R2, 5
+ADD R1, R2
+MOV R1, [R1]
+MOV R2, BP
+MOV R3, 4
+ADD R2, R3
+MOV R2, [R2]
+SUB R1, R2
+MOV [R0], R1
+MOV R0, BP
+MOV R1, 4
 ADD R0, R1
 //Right side
 MOV R1, BP
 MOV R2, 3
 ADD R1, R2
 MOV R1, [R1]
+MOV R2, BP
+MOV R3, 2
+ADD R2, R3
+MOV R2, [R2]
+ADD R1, R2
 MOV [R0], R1
+//Get address for - r 259
 MOV R0, BP
-MOV R1, 3
+MOV R1, 1
+ADD R0, R1
+MOV R0, [R0]
+//Opcode over for r
+//Part of userdefined
+//t->name - p
+MOV R1, 1
 ADD R0, R1
 //Right side
 MOV R1, BP
-MOV R2, 2
+MOV R2, 5
 ADD R1, R2
 MOV R1, [R1]
+MOV R2, BP
+MOV R3, 4
+ADD R2, R3
+MOV R2, [R2]
+PUSH R1
+MOV R1, SP
+PUSH R2
 MOV [R0], R1
-MOV R0, BP
-MOV R1, 2
-ADD R0, R1
-//Right side
+//Printing for return
 MOV R1, BP
 MOV R2, 1
 ADD R1, R2
 MOV R1, [R1]
-MOV [R0], R1
-JMP L5
-L6:
-MOV R0, 513
-//Right side
-MOV R1, BP
-MOV R2, 3
-ADD R1, R2
-MOV R1, [R1]
-MOV [R0], R1
-//Printing for return
-MOV R1, 1
 MOV R0, BP
 MOV R2, 2
 SUB R0, R2
@@ -336,200 +261,8 @@ POP R0
 POP R0
 POP R0
 POP R0
-POP BP
-RET
-
-//Code Gen for copy function
-copy:
-PUSH BP
-MOV BP, SP
-MOV R0, 1
-PUSH R0
-MOV R0, 2
-PUSH R0
-MOV R0, -3
-PUSH R0
-MOV R0, BP
-MOV R1, 2
-ADD R0, R1
-//Right side
-//Alloc statement
-MOV R1, [512]
-MOV [512], [R1]
-
-MOV [R0], R1
-//Get address for - temp 259
-MOV R0, BP
-MOV R1, 2
-ADD R0, R1
-MOV R0, [R0]
-//Opcode over for temp
-//Part of userdefined
-//t->name - a
-MOV R1, 0
-ADD R0, R1
-//Right side
-//Get address for - H 259
-MOV R1, BP
-MOV R2, -3
-ADD R1, R2
-MOV R1, [R1]
-//Opcode over for H
-//Part of userdefined
-//t->name - a
-MOV R2, 0
-ADD R1, R2
-MOV R1, [R1]
-MOV [R0], R1
-MOV R0, BP
-MOV R1, 1
-ADD R0, R1
-//Right side
-MOV R1, BP
-MOV R2, 2
-ADD R1, R2
-MOV R1, [R1]
-MOV [R0], R1
-//Get address for - temp2 259
-MOV R0, BP
-MOV R1, 1
-ADD R0, R1
-MOV R0, [R0]
-//Opcode over for temp2
-//Part of userdefined
-//t->name - next
-MOV R1, 1
-ADD R0, R1
-//Right side
-MOV R1, -1
-MOV [R0], R1
-MOV R0, BP
-MOV R1, -3
-ADD R0, R1
-//Right side
-//Get address for - H 259
-MOV R1, BP
-MOV R2, -3
-ADD R1, R2
-MOV R1, [R1]
-//Opcode over for H
-//Part of userdefined
-//t->name - next
-MOV R2, 1
-ADD R1, R2
-MOV R1, [R1]
-MOV [R0], R1
-L7:
-MOV R0, BP
-MOV R1, -3
-ADD R0, R1
-MOV R0, [R0]
-MOV R1, -1
-NE R0, R1
-JZ R0, L8
-//Get address for - temp 259
-MOV R0, BP
-MOV R1, 2
-ADD R0, R1
-MOV R0, [R0]
-//Opcode over for temp
-//Part of userdefined
-//t->name - next
-MOV R1, 1
-ADD R0, R1
-//Right side
-//Alloc statement
-MOV R1, [512]
-MOV [512], [R1]
-
-MOV [R0], R1
-//Get address for - temp 259
-MOV R0, BP
-MOV R1, 2
-ADD R0, R1
-MOV R0, [R0]
-//Opcode over for temp
-//Part of userdefined
-//t->name - next
-MOV R1, 1
-ADD R0, R1
-MOV R0, [R0]
-//t->name - a
-MOV R1, 0
-ADD R0, R1
-//Right side
-//Get address for - H 259
-MOV R1, BP
-MOV R2, -3
-ADD R1, R2
-MOV R1, [R1]
-//Opcode over for H
-//Part of userdefined
-//t->name - a
-MOV R2, 0
-ADD R1, R2
-MOV R1, [R1]
-MOV [R0], R1
-MOV R0, BP
-MOV R1, 2
-ADD R0, R1
-//Right side
-//Get address for - temp 259
-MOV R1, BP
-MOV R2, 2
-ADD R1, R2
-MOV R1, [R1]
-//Opcode over for temp
-//Part of userdefined
-//t->name - next
-MOV R2, 1
-ADD R1, R2
-MOV R1, [R1]
-MOV [R0], R1
-//Get address for - temp 259
-MOV R0, BP
-MOV R1, 2
-ADD R0, R1
-MOV R0, [R0]
-//Opcode over for temp
-//Part of userdefined
-//t->name - next
-MOV R1, 1
-ADD R0, R1
-//Right side
-MOV R1, -1
-MOV [R0], R1
-MOV R0, BP
-MOV R1, -3
-ADD R0, R1
-//Right side
-//Get address for - H 259
-MOV R1, BP
-MOV R2, -3
-ADD R1, R2
-MOV R1, [R1]
-//Opcode over for H
-//Part of userdefined
-//t->name - next
-MOV R2, 1
-ADD R1, R2
-MOV R1, [R1]
-MOV [R0], R1
-JMP L7
-L8:
-MOV R0, 513
-//Right side
-MOV R1, BP
-MOV R2, 1
-ADD R1, R2
-MOV R1, [R1]
-MOV [R0], R1
-//Printing for return
-MOV R1, 0
-MOV R0, BP
-MOV R2, 2
-SUB R0, R2
-MOV [R0], R1
+POP R0
+POP R0
 POP R0
 POP R0
 POP R0
@@ -548,82 +281,113 @@ MOV R0, 3
 PUSH R0
 MOV R0, 4
 PUSH R0
-MOV R0, 514
-//Right side
-MOV R1, -1
-MOV [R0], R1
-MOV R0, 513
-//Right side
-MOV R1, -1
-MOV [R0], R1
+MOV R0, 5
+PUSH R0
+MOV R0, 6
+PUSH R0
 MOV R0, BP
 MOV R1, 3
 ADD R0, R1
 //Right side
-MOV R1, 1
+//Alloc statement
+MOV R1, [512]
+MOV [512], [R1]
+
 MOV [R0], R1
-L9:
 MOV R0, BP
-MOV R1, 3
+MOV R1, 2
 ADD R0, R1
-MOV R0, [R0]
-MOV R1, 1
-EQ R0, R1
-JZ R0, L10
-MOV R0, 515
+//Right side
+//Alloc statement
+MOV R1, [512]
+MOV [512], [R1]
+
+MOV [R0], R1
+MOV R0, BP
+MOV R1, 5
+ADD R0, R1
 IN R1
 MOV [R0], R1
-MOV R0, 515
-MOV R0, [R0]
-MOV R1, 0
-MOV R2, 1
-SUB R1, R2
-EQ R0, R1
-JZ R0, L11
-MOV R0, BP
-MOV R1, 3
-ADD R0, R1
-//Right side
-MOV R1, 0
-MOV [R0], R1
-JMP L12
-L11:
-L12:
-MOV R0, 515
-MOV R0, [R0]
-MOV R1, 1
-EQ R0, R1
-JZ R0, L13
 MOV R0, BP
 MOV R1, 4
 ADD R0, R1
 IN R1
 MOV [R0], R1
-L15:
+//Get address for - a 259
+MOV R0, BP
+MOV R1, 3
+ADD R0, R1
+MOV R0, [R0]
+//Opcode over for a
+//Part of userdefined
+//t->name - p
+MOV R1, 1
+ADD R0, R1
+//Right side
+MOV R1, BP
+MOV R2, 5
+ADD R1, R2
+MOV R1, [R1]
+MOV R2, BP
+MOV R3, 4
+ADD R2, R3
+MOV R2, [R2]
+PUSH R1
+MOV R1, SP
+PUSH R2
+MOV [R0], R1
+MOV R0, BP
+MOV R1, 5
+ADD R0, R1
+IN R1
+MOV [R0], R1
 MOV R0, BP
 MOV R1, 4
 ADD R0, R1
+IN R1
+MOV [R0], R1
+//Get address for - b 259
+MOV R0, BP
+MOV R1, 2
+ADD R0, R1
 MOV R0, [R0]
-MOV R1, 0
-MOV R2, 1
-SUB R1, R2
-NE R0, R1
-JZ R0, L16
-MOV R0, 516
+//Opcode over for b
+//Part of userdefined
+//t->name - p
+MOV R1, 1
+ADD R0, R1
+//Right side
+MOV R1, BP
+MOV R2, 5
+ADD R1, R2
+MOV R1, [R1]
+MOV R2, BP
+MOV R3, 4
+ADD R2, R3
+MOV R2, [R2]
+PUSH R1
+MOV R1, SP
+PUSH R2
+MOV [R0], R1
+MOV R0, BP
+MOV R1, 1
+ADD R0, R1
 //Right side
 PUSH R0
 //Pushing the arguments
-//For args Head
-MOV R1, 514
+MOV R1, BP
+MOV R2, 3
+ADD R1, R2
+MOV R1, [R1]
 PUSH R1
 MOV R1, BP
-MOV R2, 4
+MOV R2, 2
 ADD R1, R2
 MOV R1, [R1]
 PUSH R1
 //Pushing arguments done
 PUSH R1
-CALL insert
+CALL add1
 POP R1
 //Popping off arguments
 POP R2
@@ -632,160 +396,48 @@ POP R2
 POP R0
 //Calling done
 MOV [R0], R1
+//Code for WRITE
+//Get address for - c 259
 MOV R0, BP
-MOV R1, 4
+MOV R1, 1
 ADD R0, R1
-IN R1
-MOV [R0], R1
-JMP L15
-L16:
-//Code for WRITE
-MOV R0, 1111
-OUT R0
-JMP L14
-L13:
-MOV R0, 515
 MOV R0, [R0]
-MOV R1, 2
-EQ R0, R1
-JZ R0, L17
-//Code for WRITE
-MOV R0, 11111
-OUT R0
-MOV R0, 516
-//Right side
-PUSH R0
-//Pushing the arguments
-MOV R1, 514
-MOV R1, [R1]
-PUSH R1
-//Pushing arguments done
-PUSH R1
-CALL print
-POP R1
-//Popping off arguments
-POP R2
-//Popping arguments done
-POP R0
-//Calling done
-MOV [R0], R1
-//Code for WRITE
-MOV R0, 11111
-OUT R0
-JMP L18
-L17:
-MOV R0, 515
+//Opcode over for c
+//Part of userdefined
+//t->name - p
+MOV R1, 1
+ADD R0, R1
 MOV R0, [R0]
-MOV R1, 3
-EQ R0, R1
-JZ R0, L19
-MOV R0, 516
-//Right side
-PUSH R0
-//Pushing the arguments
-MOV R1, 514
-MOV R1, [R1]
-PUSH R1
-//Pushing arguments done
-PUSH R1
-CALL copy
-POP R1
-//Popping off arguments
-POP R2
-//Popping arguments done
-POP R0
-//Calling done
-MOV [R0], R1
-//Code for WRITE
-MOV R0, 1111
-OUT R0
-MOV R0, 516
-//Right side
-PUSH R0
-//Pushing the arguments
-MOV R1, 513
-MOV R1, [R1]
-PUSH R1
-//Pushing arguments done
-PUSH R1
-CALL Reverse
-POP R1
-//Popping off arguments
-POP R2
-//Popping arguments done
-POP R0
-//Calling done
-MOV [R0], R1
-MOV R0, 516
-//Right side
-PUSH R0
-//Pushing the arguments
-MOV R1, 513
-MOV R1, [R1]
-PUSH R1
-//Pushing arguments done
-PUSH R1
-CALL print
-POP R1
-//Popping off arguments
-POP R2
-//Popping arguments done
-POP R0
-//Calling done
-MOV [R0], R1
-//Code for WRITE
-MOV R0, 111
-OUT R0
-JMP L20
-L19:
-MOV R0, 515
 MOV R0, [R0]
-MOV R1, 4
-EQ R0, R1
-JZ R0, L21
-//Code for WRITE
-MOV R0, 111
 OUT R0
-MOV R0, 516
-//Right side
-PUSH R0
-//Pushing the arguments
-MOV R1, 513
-MOV R1, [R1]
-PUSH R1
-//Pushing arguments done
-PUSH R1
-CALL print
-POP R1
-//Popping off arguments
-POP R2
-//Popping arguments done
-POP R0
-//Calling done
-MOV [R0], R1
 //Code for WRITE
-MOV R0, 111
-OUT R0
-JMP L22
-L21:
+//Get address for - c 259
 MOV R0, BP
-MOV R1, 3
+MOV R1, 1
 ADD R0, R1
-//Right side
-MOV R1, 0
-MOV [R0], R1
-L22:
-L20:
-L18:
-L14:
-JMP L9
-L10:
+MOV R0, [R0]
+//Opcode over for c
+//Part of userdefined
+//t->name - p
+MOV R1, 1
+ADD R0, R1
+MOV R0, [R0]
+MOV R1, 1
+ADD R0, R1
+MOV R0, [R0]
+OUT R0
 //Printing for return
-MOV R1, 9
+MOV R1, 1
 MOV R0, BP
 MOV R2, 2
 SUB R0, R2
 MOV [R0], R1
+POP R0
+POP R0
+POP R0
+POP R0
+POP R0
+POP R0
 POP R0
 POP R0
 POP R0
